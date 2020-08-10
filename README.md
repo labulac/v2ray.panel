@@ -42,3 +42,17 @@ sudo nano /usr/local/V2ray.Fun/config/app_config.json
 ```
 sudo supervisorctl restart v2ray.fun
 ```
+
+树莓派修改为静态地址192.168.66.200，这里路由器是192.168.66.1
+```
+sudo nano /etc/dhcpcd.conf
+
+# Example static IP configuration:
+interface eth0
+static ip_address=192.168.66.200/24
+static routers=192.168.66.1
+static domain_name_servers=192.168.66.1
+```
+
+然后设置路由器的DHCP网关为 192.168.66.200
+![4.png](pic/4.png)

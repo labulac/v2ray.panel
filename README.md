@@ -12,7 +12,7 @@
 ![3.png](pic/3.png)
 
 ## 系统支持
-Raspbian 9
+Raspberry Pi OS (based on Debian Buster)
 
 ## 安装方式
 ```

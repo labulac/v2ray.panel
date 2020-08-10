@@ -31,7 +31,8 @@ systemctl start rc-local
 systemctl status rc-local
 
 #install V2ray
-curl -L -s https://install.direct/go.sh | bash
+# curl -L -s https://install.direct/go.sh | bash
+bash update_v2ray.sh v4.27.0
 
 #start v2ray services
 systemctl start v2ray.service

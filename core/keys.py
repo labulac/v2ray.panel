@@ -19,3 +19,4 @@ class Keyword:
     node_link = 'node_link'
     vmess_scheme = 'vmess://'
     node_index = 'node_index'
+    groups = 'groups'

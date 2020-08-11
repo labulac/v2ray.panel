@@ -99,23 +99,46 @@ def switch_proxy_mode_api():
         result = K.ok
     return jsonify({K.result: result})
 
-@app.route('/set_subscribe')
+@app.route('/add_subscribe')
 def set_subscribe_api():
     result = K.failed
     try:
         url = request.args.get(K.subscribe)
-        CoreService.subscribe_new(url)
+        CoreService.add_subscribe(url)
         result = K.ok
     except:
         pass
 
     return jsonify({K.result : result})
 
+@app.route('/remove_subscribe')
+def remove_subscribe_api():
+    result = K.failed
+    try:
+        url = request.args.get(K.subscribe)
+        CoreService.node_manager.remove_subscribe(url)
+        result = K.ok
+    except:
+        pass
+
+    return jsonify({K.result: result})
+
+@app.route('/update_all_subscribe')
+def update_all_subscribe_api():
+    result = K.failed
+    try:
+        CoreService.node_manager.update_all()
+        result = K.ok
+    except:
+        pass
+    return jsonify({K.result: result})
+
 @app.route('/update_subscribe')
 def update_subscribe_api():
     result = K.failed
     try:
-        CoreService.subscribe_update()
+        url = request.args.get(K.subscribe)
+        CoreService.node_manager.update(url)
         result = K.ok
     except:
         pass
@@ -123,39 +146,44 @@ def update_subscribe_api():
 
 @app.route('/subscribe_list')
 def subscribe_list_api():
-    list = CoreService.node_manager.list()
-    return jsonify({K.result : K.ok,
-                    K.list : list})
+    list = CoreService.node_manager.dump()
+    status = CoreService.status()
+    list.update(status)
+    list.update({K.result : K.ok})
+    return jsonify(list)
 
 @app.route('/subscribe_ping_all')
 def subscribe_ping_all_api():
-    list = CoreService.node_manager.ping_test_all()
+    groups = CoreService.node_manager.ping_test_all()
     return jsonify({K.result : K.ok,
-                    K.list : list})
+                    K.groups : groups})
 
 @app.route('/apply_node')
 def apply_node_api():
+    url = request.args.get(K.subscribe)
     index = request.args.get(K.node_index)
     index = int(index)
     result = K.failed
-    if CoreService.apply_node(index):
+    if CoreService.apply_node(url, index):
         result = K.ok
 
     return jsonify({K.result: result})
 
 @app.route('/get_node_link')
 def get_node_link_api():
+    url = request.args.get(K.subscribe)
     index = request.args.get(K.node_index)
     index = int(index)
-    link = CoreService.node_link(index)
+    link = CoreService.node_link(url, index)
     return jsonify({ K.result: K.ok,
                      K.node_link: link})
 
 @app.route('/delete_node')
 def delete_node_api():
+    url = request.args.get(K.subscribe)
     index = request.args.get(K.node_index)
     index = int(index)
-    CoreService.node_manager.delete_node(index)
+    CoreService.node_manager.delete_node(url, index)
     return jsonify({K.result: K.ok})
 
 @app.route('/get_access_log')

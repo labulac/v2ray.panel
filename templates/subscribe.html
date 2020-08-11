@@ -10,17 +10,15 @@
                 </thead>
                 <tbody id="subscribe_body">
                 <tr>
-                    <td>订阅网址</td>
-                    <td colspan="1">
-                        <div id="subscribe_url"></div>
-                    </td>
+                    <td>最近订阅</td>
+                    <td id="last_subscribe"></td>
                     <td colspan="3">
                         <div class="mdui-row">
-                            <div id="update_subscribe" class="mdui-col-sm-3">
-                                <button class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent mdui-ripple" onclick="update_subscribe()">更新</button>
+                            <div id="update_all_subscribe" class="mdui-col-sm-3" style="display: none">
+                                <button class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent mdui-ripple" onclick="update_all_subscribe()">全部更新</button>
                             </div>
                             <div class="mdui-col-sm-3">
-                                <button class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent mdui-ripple" onclick="set_subscribe()">订阅</button>
+                                <button class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent mdui-ripple" onclick="add_subscribe()">订阅</button>
                             </div>
                             <div id="ping_test" class="mdui-col-sm-3" style="display: none">
                                 <button class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent mdui-ripple" onclick="ping_test()">ping</button>
@@ -28,14 +26,24 @@
                         </div>
                     </td>
                 </tr>
-                <tr>
-                    <td>最近订阅</td>
-                    <td id="last_subscribe" colspan="4"></td>
+                <tr id="subscribe_template" class="mdui-color-light-blue-50" style="display: none">
+                    <td>订阅地址</td>
+                    <td>
+                        <div class="url"></div>
+                    </td>
+                    <td colspan="3">
+                        <div class="mdui-row">
+                            <div class="mdui-col-sm-3">
+                                <button class="update_subscribe mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent mdui-ripple">更新</button>
+                            </div>
+                            <div class="mdui-col-sm-3">
+                                <button class="remove_subscribe mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-red-400 mdui-ripple">删除</button>
+                            </div>
+                        </div>
+
+                    </td>
                 </tr>
-                <tr>
-                    <td class="mdui-typo-caption-opacity" colspan="6">节点列表</td>
-                </tr>
-                <tr class="mdui-typo-caption-opacity">
+                <tr id="node_header_template" class="mdui-typo-caption-opacity" style="display: none">
                     <td>序号</td>
                     <td>名称</td>
                     <td>地址</td>
@@ -86,66 +94,101 @@
     });
 
     function refresh() {
-        $.get("/get_status", function (status) {
-            $("#subscribe_url").html(status["subscribe"]);
-            $("#last_subscribe").html(status["last_subscribe"]);
-            if(!status["subscribe"]) {
-                $("#update_subscribe").hide();
+        $.get("/subscribe_list", function (subscribe) {
+            $("#last_subscribe").html(subscribe["last_subscribe"]);
+            groups = subscribe["groups"];
+            if (groups.length === 0) {
+                $("#update_all_subscribe").hide();
+                $("#ping_test").hide();
             }
             else {
-                $("#update_subscribe").show();
+                $("#update_all_subscribe").show();
+                $("#ping_test").show();
             }
 
-            $.get("/subscribe_list", function (subscribe) {
-                $("tr[id^='real_node']").remove();
+            $("tr[id^='real_subscribe']").remove();
+            $("tr[id^='real_header']").remove();
+            $("tr[id^='real_node']").remove();
 
-                node_running = status["ps"];
-                subscribe = subscribe["list"];
-                for(var i = 0; i < subscribe.length; i++) {
-                    item = subscribe[i]
-                    var node = $("#node_template").clone();
-                    node.attr("id", "real_node_" + (i + 1).toString());
-                    node.find(".node_index").html((i + 1).toString());
-                    node.find(".node_name").html(item["ps"]);
-                    node.find(".node_addr").html(item["add"]);
-                    if (item["ps"] === node_running) {
-                        node.find(".apply_node").find("i").html("vpn_key");
+
+            node_running = subscribe["ps"];
+            tbody = $("tbody");
+            for (var i = 0; i < groups.length; i++) {
+                group = groups[i];
+                url = group["subscribe"];
+                var url_row = $("#subscribe_template").clone();
+                url_row.find(".url").html(url);
+                url_row.attr("id", "real_subscribe_" + (i + 1).toString());
+                tbody.append(url_row);
+                url_row.show();
+
+                node_head_row = $("#node_header_template").clone();
+                node_head_row.attr("id", "real_header_" + (i + 1).toString());
+                tbody.append(node_head_row);
+                node_head_row.show();
+
+                node_list = group["list"];
+                for (var j = 0; j < node_list.length; j++) {
+                    node_data = node_list[j];
+
+                    var node_row = $("#node_template").clone();
+                    node_row.attr("id", "real_node_" + (j + 1).toString());
+                    node_row.attr("url", url);
+                    node_row.find(".node_index").html((j + 1).toString());
+                    node_row.find(".node_name").html(node_data["ps"]);
+                    node_row.find(".node_addr").html(node_data["add"]);
+                    if (node_data["ps"] === node_running) {
+                        node_row.find(".apply_node").find("i").html("vpn_key");
                     }
 
-                    $("tbody").append(node);
-                    node.show();
+                    tbody.append(node_row);
+                    node_row.show();
                 }
+            }
 
-                $(".apply_node").click(function () {
-                    var node_index = parseInt($(this).closest("tr").find(".node_index").text()) - 1;
-                    apply_node(node_index);
-                });
+            $(".update_subscribe").click(function () {
+                url = $(this).closest("tr").find(".url").text();
+                update_subscribe(url);
+            })
 
-                $(".get_node_link").click(function () {
-                    var node_index = parseInt($(this).closest("tr").find(".node_index").text() - 1);
-                    get_node_link(node_index);
-                })
+            $(".remove_subscribe").click(function () {
+                url = $(this).closest("tr").find(".url").text();
+                remove_subscribe(url);
+            })
 
-                $(".get_node_qr").click(function () {
-                    var node_index = parseInt($(this).closest("tr").find(".node_index").text() - 1);
-                    get_node_qr(node_index);
-                })
-
-                $(".delete_node").click(function () {
-                    var node_index = parseInt($(this).closest("tr").find(".node_index").text() - 1);
-                    delete_node(node_index);
-                })
-
-                if (subscribe.length > 0) {
-                    $("#ping_test").show();
-                }
+            $(".apply_node").click(function () {
+                row = $(this).closest("tr");
+                url = row.attr("url");
+                var node_index = parseInt(row.find(".node_index").text()) - 1;
+                apply_node(url, node_index);
             });
+
+            $(".get_node_link").click(function () {
+                row = $(this).closest("tr");
+                url = row.attr("url");
+                var node_index = parseInt(row.find(".node_index").text()) - 1;
+                get_node_link(url, node_index);
+            })
+
+            $(".get_node_qr").click(function () {
+                row = $(this).closest("tr");
+                url = row.attr("url");
+                var node_index = parseInt(row.find(".node_index").text()) - 1;
+                get_node_qr(url, node_index);
+            })
+
+            $(".delete_node").click(function () {
+                row = $(this).closest("tr");
+                url = row.attr("url");
+                var node_index = parseInt(row.find(".node_index").text()) - 1;
+                delete_node(url, node_index);
+            })
         });
     }
     
-    function apply_node(index) {
+    function apply_node(url, index) {
         pop_toast("正在应用节点...")
-        $.get("/apply_node", {node_index:index}).done(function (data) {
+        $.get("/apply_node", {subscribe:url, node_index:index}).done(function (data) {
             if (check_result(data)) {
                 update_toast("应用成功");
             }
@@ -158,8 +201,8 @@
         });
     }
     
-    function get_node_link(index) {
-        $.get("/get_node_link", {node_index:index}).done(function (data) {
+    function get_node_link(url, index) {
+        $.get("/get_node_link", {subscribe:url, node_index:index}).done(function (data) {
             if (check_result(data)) {
                 link = data["node_link"];
                 copy_to_clipboard(link);
@@ -168,8 +211,8 @@
         })
     }
 
-    function get_node_qr(index) {
-        $.get("/get_node_link", {node_index:index}).done(function (data) {
+    function get_node_qr(url, index) {
+        $.get("/get_node_link", {subscribe:url, node_index:index}).done(function (data) {
             if (check_result(data)) {
                 link = data["node_link"];
 
@@ -181,9 +224,9 @@
         })
     }
 
-    function delete_node(index) {
+    function delete_node(url, index) {
         mdui.confirm("确认删除？", function () {
-            $.get("/delete_node", {node_index:index}).done(function (data) {
+            $.get("/delete_node", {subscribe:url, node_index:index}).done(function (data) {
                 if (check_result(data)) {
                     message("节点已删除");
                     refresh();
@@ -192,9 +235,9 @@
         });
     }
 
-    function update_subscribe() {
+    function update_subscribe(url) {
         pop_toast("正在更新订阅节点...")
-        $.get("/update_subscribe").done(function (data) {
+        $.get("/update_subscribe", {subscribe:url}).done(function (data) {
             if (check_result(data)) {
                 update_toast("更新成功");
             }
@@ -207,13 +250,28 @@
         });
     }
 
-    function set_subscribe() {
+    function update_all_subscribe() {
+        pop_toast("正在更新订阅节点...")
+        $.get("/update_all_subscribe").done(function (data) {
+            if (check_result(data)) {
+                update_toast("更新成功");
+            }
+            else {
+                update_toast("更新失败");
+            }
+        }).always(function () {
+            close_toast();
+            refresh();
+        });
+    }
+
+    function add_subscribe() {
         mdui.prompt("请输入订阅地址：", function (url) {
             if (!url.length) {
                 return;
             }
             pop_toast("正在订阅新的节点列表...");
-            $.get("/set_subscribe", {subscribe:url}).done(function (data) {
+            $.get("/add_subscribe", {subscribe:url}).done(function (data) {
                 if (check_result(data)) {
                     update_toast("订阅成功");
                 }
@@ -227,27 +285,44 @@
         });
     }
 
+    function remove_subscribe(url) {
+        mdui.confirm("确认删除？", function () {
+            $.get("/remove_subscribe", {subscribe:url}).done(function (data) {
+                if (check_result(data)) {
+                    message("订阅已删除");
+                    refresh();
+                }
+            })
+        });
+    }
+
     function ping_test() {
         $.get("/subscribe_ping_all", function (data) {
-            list = data["list"];
-            $("tr[id^='real_node']").each(function (i, row) {
-                node_addr = $(row).find(".node_addr").text();
-                delay = list[node_addr];
-                var content = "";
+            var groups = data["groups"];
+            for (var i = 0; i < groups.length; i++) {
+                group = groups[i];
+                list = group["list"];
+                url = group["subscribe"];
+                $("tbody").find(`tr[url='${url}']`).each(function (index, row) {
+                    node_addr = $(row).find(".node_addr").text();
+                    delay = list[node_addr];
 
-                td = $(row).find(".node_delay");
-                td.removeClass("mdui-text-color-red");
-                td.removeClass("mdui-text-color-green");
-                if (-1 === delay) {
-                    content = "☹";
-                    td.addClass("mdui-text-color-red");
-                }
-                else {
-                    content = String(delay) + " ms";
-                    td.addClass("mdui-text-color-green");
-                }
-                td.html(content);
-            })
+                    td = $(row).find(".node_delay");
+                    td.removeClass("mdui-text-color-red");
+                    td.removeClass("mdui-text-color-green");
+
+                    var content = "";
+                    if (-1 === delay) {
+                        content = "☹";
+                        td.addClass("mdui-text-color-red");
+                    }
+                    else {
+                        content = String(delay) + " ms";
+                        td.addClass("mdui-text-color-green");
+                    }
+                    td.html(content);
+                });
+            }
         });
     }
 </script>

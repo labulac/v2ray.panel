@@ -12,8 +12,6 @@ class AppConfig(BaseDataItem):
         self.user = None
         self.password = None
         self.port = None
-        self.subscribe = None
-        self.last_subscribe = None
         self.proxy_mode = None
 
     def filename(self):

@@ -183,6 +183,8 @@
                 var node_index = parseInt(row.find(".node_index").text()) - 1;
                 delete_node(url, node_index);
             })
+
+            update_ping_result();
         });
     }
     
@@ -296,11 +298,18 @@
         });
     }
 
+    var g_ping_cache = null;
     function ping_test() {
         $.get("/subscribe_ping_all", function (data) {
-            var groups = data["groups"];
-            for (var i = 0; i < groups.length; i++) {
-                group = groups[i];
+            g_ping_cache = data["groups"];
+            update_ping_result();
+        });
+    }
+
+    function update_ping_result() {
+        if (g_ping_cache != null) {
+            for (var i = 0; i < g_ping_cache.length; i++) {
+                group = g_ping_cache[i];
                 list = group["list"];
                 url = group["subscribe"];
                 $("tbody").find(`tr[url='${url}']`).each(function (index, row) {
@@ -323,6 +332,6 @@
                     td.html(content);
                 });
             }
-        });
+        }
     }
 </script>

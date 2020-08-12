@@ -304,8 +304,8 @@
                 list = group["list"];
                 url = group["subscribe"];
                 $("tbody").find(`tr[url='${url}']`).each(function (index, row) {
-                    node_addr = $(row).find(".node_addr").text();
-                    delay = list[node_addr];
+                    node_name = $(row).find(".node_name").text();
+                    delay = list[node_name];
 
                     td = $(row).find(".node_delay");
                     td.removeClass("mdui-text-color-red");

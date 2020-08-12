@@ -145,7 +145,7 @@ class NodeManager:
                 futures_to_hosts = {}
                 for node in group.nodes:
                     future = executor.submit(ping, node.add, node.port)
-                    futures_to_hosts[future] = node.add
+                    futures_to_hosts[future] = node.ps
                 futures.wait(futures_to_hosts.keys())
 
                 group_result = {}

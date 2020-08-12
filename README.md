@@ -32,8 +32,6 @@ sudo nano /usr/local/V2ray.Fun/config/app_config.json
     "user": "admin",
     "password": "admin",
     "port": 1099,
-    "subscribe": "https://www.xxx.com/link/xxx",
-    "last_subscribe": 1596112704,
     "proxy_mode": 1
 }
 ```

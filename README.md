@@ -18,7 +18,7 @@ Raspberry Pi OS (based on Debian Buster)
 ```
 sudo su - root
 cd /usr/local
-git clone git@github.com:twotreesus/V2ray.FunPi.git V2ray.Fun
+git clone https://github.com/twotreesus/V2ray.FunPi.git V2ray.Fun
 cd V2ray.Fun/script
 ./install.sh
 ```

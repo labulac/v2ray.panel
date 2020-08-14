@@ -2,5 +2,6 @@
     "user": "admin",
     "password": "admin",
     "port": 1086,
-    "proxy_mode": 1
+    "proxy_mode": 1,
+    "inited": false
 }

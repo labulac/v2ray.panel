@@ -66,9 +66,6 @@ supervisord -c /etc/supervisor/supervisord.conf
 echo "supervisord -c /etc/supervisor/supervisord.conf">>/etc/rc.local
 chmod +x /etc/rc.local
 
-# config iptable
-bash config_iptable.sh
-
 echo net.ipv4.ip_forward=1 >> /etc/sysctl.conf && sysctl -p
 cat>>/etc/systemd/system/v2ray_iptable.service<<EOF
 [Unit]
@@ -79,12 +76,10 @@ Wants=network-online.target
 [Service]
 
 Type=oneshot
-ExecStart=bash /usr/local/V2ray.Fun/script/config_iptable.sh
+ExecStart=/bin/bash /usr/local/V2ray.Fun/script/config_iptable.sh
 
 [Install]
 WantedBy=multi-user.target
 EOF
-
-systemctl enable v2ray_iptable.service
 
 echo "install success"

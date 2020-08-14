@@ -13,6 +13,7 @@ class AppConfig(BaseDataItem):
         self.password = None
         self.port = None
         self.proxy_mode = None
+        self.inited = False
 
     def filename(self):
         return 'config/app_config.json'

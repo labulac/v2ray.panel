@@ -6,6 +6,7 @@ Date:       2020年7月30日  31周星期四 10:55
 Desc:
 """
 import psutil
+import subprocess
 
 from .app_config import AppConfig
 from .node_item import NodeItem
@@ -70,8 +71,14 @@ class CoreService:
         if cls.v2ray.apply_node(node, cls.node_manager.all_nodes(), cls.app_config.proxy_mode):
             cls.node_config = node
             cls.node_config.save()
-            result = True
 
+            if not cls.app_config.inited:
+                subprocess.check_output("bash ./script/config_iptable.sh", shell=True)
+                subprocess.check_output("enable v2ray_iptable.service", shell=True)
+                cls.app_config.inited = True
+                cls.app_config.save()
+
+            result = True
         return result
 
     @classmethod

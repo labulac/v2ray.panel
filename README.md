@@ -13,6 +13,7 @@
 
 ## 系统支持
 Raspberry Pi OS (based on Debian Buster)
+Armbian (based on Debian Buster)
 
 ## 安装方式
 ```

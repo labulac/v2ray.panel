@@ -11,7 +11,7 @@ apt-get install wget curl socat git python3 python3-setuptools python3-dev pytho
 pip3 install -r requirements.txt
 
 #enable rc.local
-cat <<EOF >/etc/rc.local
+cat>>/etc/rc.local<<EOF
 #!/bin/sh -e
 #
 # rc.local
@@ -24,11 +24,10 @@ cat <<EOF >/etc/rc.local
 # bits.
 #
 # By default this script does nothing.
+
+mkdir /var/log/v2ray
 exit 0
 EOF
-chmod +x /etc/rc.local
-systemctl start rc-local
-systemctl status rc-local
 
 #install V2ray
 # curl -L -s https://install.direct/go.sh | bash
@@ -84,9 +83,8 @@ EOF
 
 chmod 644 /etc/v2ray/config.json
 supervisord -c /etc/supervisor/supervisord.conf
-echo "supervisord -c /etc/supervisor/supervisord.conf">>/etc/rc.local
-chmod +x /etc/rc.local
 
+# ip table
 echo net.ipv4.ip_forward=1 >> /etc/sysctl.conf && sysctl -p
 cat>>/etc/systemd/system/v2ray_iptable.service<<EOF
 [Unit]
@@ -102,5 +100,10 @@ ExecStart=/bin/bash /usr/local/V2ray.Fun/script/config_iptable.sh
 [Install]
 WantedBy=multi-user.target
 EOF
+
+# 
+chmod +x /etc/rc.local
+systemctl start rc-local
+systemctl status rc-local
 
 echo "install success"

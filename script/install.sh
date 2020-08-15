@@ -37,6 +37,23 @@ bash update_v2ray.sh v4.27.0
 mkdir -p /etc/v2ray/
 touch /etc/v2ray/config.json
 mkdir -p /var/log/v2ray/
+cat>>/etc/supervisor/supervisord.conf<<EOF
+Description=V2Ray Service
+After=network.target nss-lookup.target
+
+[Service]
+User=root
+CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+NoNewPrivileges=true
+Environment=V2RAY_LOCATION_ASSET=/usr/local/share/v2ray/
+ExecStart=/usr/local/bin/v2ray -config /etc/v2ray/config.json
+LimitNPROC=500
+LimitNOFILE=1000000
+
+[Install]
+WantedBy=multi-user.target
+EOF
 
 #start v2ray services
 systemctl start v2ray.service

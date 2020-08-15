@@ -36,7 +36,7 @@ class V2rayController:
             return True
 
     def version(self) -> str:
-        v2ray_path = '/usr/bin/v2ray/v2ray'
+        v2ray_path = 'v2ray'
         cmd_get_current_ver = """echo `{0} -version 2>/dev/null` | head -n 1 | cut -d " " -f2""".format(v2ray_path)
         current_ver = 'v' + subprocess.check_output(cmd_get_current_ver, shell=True).decode('utf-8').replace('\n', '')
 

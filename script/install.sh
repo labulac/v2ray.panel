@@ -7,7 +7,7 @@ export PATH
 
 #install Needed Packages
 apt-get update -y
-apt-get install wget curl socat git python3 python3-dev python3-pip openssl libssl-dev ca-certificates supervisor -y
+apt-get install wget curl socat git python3 python3-setuptools python3-dev python3-pip openssl libssl-dev ca-certificates supervisor -y
 pip3 install -r requirements.txt
 
 #enable rc.local
@@ -33,6 +33,10 @@ systemctl status rc-local
 #install V2ray
 # curl -L -s https://install.direct/go.sh | bash
 bash update_v2ray.sh v4.27.0
+
+mkdir -p /etc/v2ray/
+touch /etc/v2ray/config.json
+mkdir -p /var/log/v2ray/
 
 #start v2ray services
 systemctl start v2ray.service

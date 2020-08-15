@@ -5,15 +5,19 @@
 一个基于 Web 的 V2ray 控制面板，已改造为将树莓派作为旁路由使用，只需要设置好网关，支持直连\智能分流\全局代理 三种模式，并能自动管理订阅，原理参考 [透明代理(TPROXY)
 ](https://guide.v2fly.org/app/tproxy.html)，TG:[https://t.me/v2ray_funpi](https://t.me/v2ray_funpi)
 
-![1.png](pic/1.png)
+![1.png](pic/1.png)  
 
-![2.png](pic/2.png)
+![2.png](pic/2.png)  
 
-![3.png](pic/3.png)
+![3.png](pic/3.png)  
 
 ## 硬件支持
 Raspberry Pi 4B  
-[ZeroPi](http://wiki.friendlyarm.com/wiki/index.php/ZeroPi)
+[ZeroPi](http://wiki.friendlyarm.com/wiki/index.php/ZeroPi)  
+
+![zeropi_1.jpg](pic/zeropi_1.jpg)  
+
+![zeropi_2.jpg](pic/zeropi_2.jpg)  
 
 ## 系统支持
 Raspberry Pi OS (based on Debian Buster)  

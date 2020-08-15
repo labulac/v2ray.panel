@@ -11,8 +11,12 @@
 
 ![3.png](pic/3.png)
 
+## 硬件支持
+Raspberry Pi 4B  
+[ZeroPi](http://wiki.friendlyarm.com/wiki/index.php/ZeroPi)
+
 ## 系统支持
-Raspberry Pi OS (based on Debian Buster)
+Raspberry Pi OS (based on Debian Buster)  
 Armbian (based on Debian Buster)
 
 ## 安装方式

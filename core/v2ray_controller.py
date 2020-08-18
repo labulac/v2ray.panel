@@ -10,6 +10,7 @@ import subprocess
 import requests
 from .node_item import NodeItem
 from . import v2ray_config_generator
+from .advance_config import AdvanceConfig
 
 class V2rayController:
     def start(self) -> bool:
@@ -36,7 +37,7 @@ class V2rayController:
             return True
 
     def version(self) -> str:
-        v2ray_path = '/usr/bin/v2ray/v2ray'
+        v2ray_path = 'v2ray'
         cmd_get_current_ver = """echo `{0} -version 2>/dev/null` | head -n 1 | cut -d " " -f2""".format(v2ray_path)
         current_ver = 'v' + subprocess.check_output(cmd_get_current_ver, shell=True).decode('utf-8').replace('\n', '')
 
@@ -82,12 +83,15 @@ class V2rayController:
                 string += wrap + '<br>'
         return string
 
-    def apply_node(self, node: NodeItem, all_nodes:list, mode: int) -> bool:
-        config = v2ray_config_generator.gen_config(node, all_nodes, mode)
-        return self.apply_config(config)
+    def apply_node(self, node: NodeItem, all_nodes:list, mode: int, advance_config: AdvanceConfig, restart: bool) -> bool:
+        config = v2ray_config_generator.gen_config(node, all_nodes, mode, advance_config)
+        return self.apply_config(config, restart)
 
-    def apply_config(self, config: str) -> bool:
+    def apply_config(self, config: str, restart: bool) -> bool:
         with open('/etc/v2ray/config.json', 'w+') as f:
             f.write(config)
 
-        return self.restart()
+        result = True
+        if restart:
+            result = self.restart()
+        return  result

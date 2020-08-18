@@ -10,12 +10,15 @@ import psutil
 from .app_config import AppConfig
 from .node_item import NodeItem
 from .v2ray_controller import V2rayController
+from . import v2ray_config_generator
 from .node_manager import NodeManager
 from .keys import Keyword as K
+from .advance_config import AdvanceConfig
 
 class CoreService:
     app_config = AppConfig()
     node_config = NodeItem()
+    advance_config = AdvanceConfig()
     v2ray = V2rayController()
     node_manager = NodeManager()
 
@@ -23,6 +26,7 @@ class CoreService:
     def load(cls):
         cls.app_config.load()
         cls.node_config.load()
+        cls.advance_config.load()
         cls.node_manager.load()
 
     @classmethod
@@ -67,7 +71,7 @@ class CoreService:
     def apply_node(cls, url:str, index: int) -> bool:
         result = False
         node = cls.node_manager.groups[url].nodes[index]
-        if cls.v2ray.apply_node(node, cls.node_manager.all_nodes(), cls.app_config.proxy_mode):
+        if cls.v2ray.apply_node(node, cls.node_manager.all_nodes(), cls.app_config.proxy_mode, cls.advance_config, True):
             cls.node_config = node
             cls.node_config.save()
             result = True
@@ -76,11 +80,11 @@ class CoreService:
 
     @classmethod
     def switch_mode(cls, proxy_mode: int) -> bool:
-        result = False
-        if (cls.v2ray.apply_node(cls.node_config, cls.node_manager.all_nodes(), proxy_mode)):
+        result = True
+        result = cls.v2ray.apply_node(cls.node_config, cls.node_manager.all_nodes(), proxy_mode, cls.advance_config, cls.v2ray.running())
+        if result:
             cls.app_config.proxy_mode = proxy_mode
             cls.app_config.save()
-            result = True
 
         return result
 
@@ -88,4 +92,32 @@ class CoreService:
     def node_link(cls, url: str, index: int) ->bool:
         node = cls.node_manager.groups[url].nodes[index]
         return node.link
+
+    @classmethod
+    def default_local_dns(cls):
+        return v2ray_config_generator.default_dns_local()
+
+    @classmethod
+    def set_local_dns(cls, local_dns: str):
+        result = True
+        cls.advance_config.local_dns = local_dns
+        result = cls.v2ray.apply_node(cls.node_config, cls.node_manager.all_nodes(), cls.app_config.proxy_mode, cls.advance_config, cls.v2ray.running())
+        if result:
+            cls.advance_config.save()
+        return result
+
+    @classmethod
+    def default_remote_dns(cls):
+        return v2ray_config_generator.default_dns_remote()
+
+    @classmethod
+    def set_remote_dns(cls, remote_dns: str):
+        result = True
+        cls.advance_config.remote_dns = remote_dns
+        result = cls.v2ray.apply_node(cls.node_config, cls.node_manager.all_nodes(), cls.app_config.proxy_mode, cls.advance_config, cls.v2ray.running())
+        if result:
+            cls.advance_config.save()
+        return result
+
+
 

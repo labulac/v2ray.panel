@@ -1,0 +1,159 @@
+<link rel="stylesheet" href="/static/css/Chart.css">
+<div id="advance_page" class="mdui-container">
+    <p></p>
+    <div class="mdui-row">
+        <div class="mdui-table-fluid">
+            <table class="mdui-table">
+                <thead>
+                <tr>
+                    <th colspan="2">高级设置</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td colspan="2" class="mdui-typo-caption-opacity">自定义 DNS 服务器</td>
+                </tr>
+                <tr>
+                    <td>国内 DNS</td>
+                    <td>
+                        <div class="mdui-row">
+                            <div id="local_dns" class="mdui-col-sm-3"></div>
+                            <div id="modify_local_dns" class="mdui-col-sm-2">
+                                <button class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent mdui-ripple" onclick="modify_local_dns()">修改</button>
+                            </div>
+                            <div id="clear_local_dns" class="mdui-col-sm-2" style="display: none">
+                                <button class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent mdui-ripple" onclick="clear_local_dns()">清除</button>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>国外 DNS</td>
+                    <td>
+                        <div class="mdui-row">
+                            <div id="remote_dns" class="mdui-col-sm-3"></div>
+                            <div id="modify_remote_dns" class="mdui-col-sm-2">
+                                <button class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent mdui-ripple" onclick="modify_remote_dns()">修改</button>
+                            </div>
+                            <div id="clear_remote_dns" class="mdui-col-sm-2" style="display: none">
+                                <button class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent mdui-ripple" onclick="clear_remote_dns()">清除</button>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="/static/js/Chart.js"></script>
+<script type="text/javascript">
+    //# sourceURL=advance.js
+    $(document).ready(function () {
+        refresh()
+    });
+
+    function refresh() {
+        $.get("/get_advance_config", function (data) {
+            dns_config = data['dns'];
+            default_dns_local = dns_config["default_local"];
+            default_dns_remote = dns_config["default_remote"];
+            dns_local = dns_config["local"];
+            dns_remote = dns_config["remote"];
+
+            if (dns_local.length > 0) {
+                $("#local_dns").html(dns_local).removeClass("mdui-text-color-black-disabled");
+                $("#clear_local_dns").show();
+            }
+            else {
+                $("#local_dns").html(default_dns_local).addClass("mdui-text-color-black-disabled");
+                $("#clear_local_dns").hide();
+            }
+
+            if (dns_remote.length > 0) {
+                $("#remote_dns").html(dns_remote).removeClass("mdui-text-color-black-disabled");
+                $("#clear_remote_dns").show();
+            }
+            else {
+                $("#remote_dns").html(default_dns_remote).addClass("mdui-text-color-black-disabled");
+                $("#clear_remote_dns").hide();
+            }
+        });
+    }
+    
+    function modify_local_dns() {
+        mdui.prompt("请输入国内 DNS 地址：", function (dns) {
+            if (!dns.length) {
+                return;
+            }
+
+            message("正在设置...")
+            $.get("advance_set_dns", {local:dns}).done(function (data) {
+                if (check_result(data)) {
+                    message("设置成功");
+                }
+                else {
+                    message("设置失败");
+                }
+            }).always(function () {
+                close_toast();
+                refresh();
+            })
+        });
+    }
+
+    function clear_local_dns() {
+        message("正在设置...")
+
+        $.get("advance_set_dns", {local:""}).done(function (data) {
+            if (check_result(data)) {
+                message("设置成功");
+            }
+            else {
+                message("设置失败");
+            }
+        }).always(function () {
+            close_toast();
+            refresh();
+        })
+    }
+    
+    function modify_remote_dns() {
+        mdui.prompt("请输入国外 DNS 地址：", function (dns) {
+            if (!dns.length) {
+                return;
+            }
+
+            message("正在设置...")
+            $.get("advance_set_dns", {remote:dns}).done(function (data) {
+                if (check_result(data)) {
+                    message("设置成功");
+                }
+                else {
+                    message("设置失败");
+                }
+            }).always(function () {
+                close_toast();
+                refresh();
+            })
+        });
+    }
+    
+    function clear_remote_dns() {
+        message("正在设置...")
+
+        $.get("advance_set_dns", {remote:""}).done(function (data) {
+            if (check_result(data)) {
+                message("设置成功");
+            }
+            else {
+                message("设置失败");
+            }
+        }).always(function () {
+            close_toast();
+            refresh();
+        })
+    }
+
+</script>

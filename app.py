@@ -28,6 +28,14 @@ def index_page():
 def status_page():
     return render_template("status.html")
 
+@app.route('/subscribe.html')
+def subscribe_page():
+    return render_template("subscribe.html")
+
+@app.route('/advance.html')
+def advance_page():
+    return render_template("advance.html")
+
 @app.route('/app.html')
 def app_page():
     return render_template("app.html")
@@ -35,10 +43,6 @@ def app_page():
 @app.route('/log.html')
 def log_page():
     return render_template("log.html")
-
-@app.route('/subscribe.html')
-def subscribe_page():
-    return render_template("subscribe.html")
 
 @app.route('/start_service')
 def start_service_api():
@@ -185,6 +189,32 @@ def delete_node_api():
     index = int(index)
     CoreService.node_manager.delete_node(url, index)
     return jsonify({K.result: K.ok})
+
+@app.route('/get_advance_config')
+def get_advance_config_api():
+    dns = {
+        K.default_local : CoreService.default_local_dns(),
+        K.default_remote : CoreService.default_remote_dns(),
+        K.local : CoreService.advance_config.local_dns,
+        K.remote : CoreService.advance_config.remote_dns
+    }
+
+    return jsonify({ K.result: K.ok, 'dns': dns })
+
+@app.route('/advance_set_dns')
+def advance_set_dns_api():
+    local_dns = request.args.get('local')
+    remote_dns = request.args.get('remote')
+
+    if local_dns != None:
+        if not CoreService.set_local_dns(local_dns):
+            return jsonify({ K.result : K.failed })
+
+    if remote_dns != None:
+        if not CoreService.set_remote_dns(remote_dns):
+            return jsonify({K.result: K.failed})
+
+    return jsonify({ K.result : K.ok })
 
 @app.route('/get_access_log')
 def get_access_log_api():

@@ -6,6 +6,7 @@ Date:       2020年7月29日  31周星期三 21:45
 Desc:
 """
 import json
+import os.path
 
 class BaseDataItem:
     def filename(self):
@@ -20,9 +21,10 @@ class BaseDataItem:
         return vars(self)
 
     def load(self):
-        with open(self.filename()) as f:
-            data = json.load(f)
-            self.update(data)
+        if os.path.exists(self.filename()):
+            with open(self.filename()) as f:
+                data = json.load(f)
+                self.update(data)
 
     def save(self):
         data = self.dump()

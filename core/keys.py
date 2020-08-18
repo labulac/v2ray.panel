@@ -20,3 +20,7 @@ class Keyword:
     vmess_scheme = 'vmess://'
     node_index = 'node_index'
     groups = 'groups'
+    default_local = 'default_local'
+    default_remote = 'default_remote'
+    local = 'local'
+    remote= 'remote'

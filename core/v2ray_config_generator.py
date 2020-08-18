@@ -8,17 +8,18 @@ Desc:
 import json
 from .proxy_mode import ProxyMode
 from .node_item import NodeItem
+from .advance_config import AdvanceConfig
 
-def gen_config(node: NodeItem, all_nodes: list, mode: int) -> str:
+def gen_config(node: NodeItem, all_nodes: list, mode: int, advance_config: AdvanceConfig) -> str:
     config = gen_basic()
     detail = None
     if mode == ProxyMode.Direct.value:
         detail = gen_direct(node)
     elif mode == ProxyMode.ProxyAuto.value:
-        detail = gen_proxy_auto(node)
+        detail = gen_proxy_auto(node, advance_config)
         append_all_nodes_rules(detail, all_nodes)
     elif mode == ProxyMode.ProxyGlobal.value:
-        detail = gen_proxy_global(node)
+        detail = gen_proxy_global(node, advance_config)
         append_all_nodes_rules(detail, all_nodes)
 
     config.update(detail)
@@ -212,15 +213,14 @@ def gen_proxy_outbands(node: NodeItem) -> dict:
 
     return config
 
-def gen_proxy_global(node: NodeItem) -> dict:
+def gen_proxy_global(node: NodeItem, advance_config: AdvanceConfig) -> dict:
     proxy_global_raw_config = '''
 {	
     "dns": {
         "servers": [
-            "8.8.8.8",
-            "8.8.4.4",
+            "<str:remote_dns>",
             {
-                "address": "223.5.5.5",
+                "address": "<str:local_dns>",
                 "domains": [
                     "ntp.org",
                     "geosite:speedtest",
@@ -251,22 +251,6 @@ def gen_proxy_global(node: NodeItem) -> dict:
 				"type": "field"
 			},
 			{
-				"ip": [
-					"223.5.5.5",
-					"223.6.6.6"
-				],
-				"outboundTag": "direct",
-				"type": "field"
-			},
-			{
-				"ip": [
-					"8.8.8.8",
-					"8.8.4.4"
-				],
-				"outboundTag": "proxy",
-				"type": "field"
-			},
-			{
 				"domain": [
 					"geosite:category-ads-all"
 				],
@@ -291,20 +275,20 @@ def gen_proxy_global(node: NodeItem) -> dict:
 	}
 }'''
     config = json.loads(proxy_global_raw_config)
-    config['dns']['servers'][2]['domains'][2] = node.add
+    update_dns_config(config, advance_config)
+    config['dns']['servers'][1]['domains'][2] = node.add
 
     config.update(gen_proxy_outbands(node))
     return config
 
-def gen_proxy_auto(node: NodeItem) -> dict:
+def gen_proxy_auto(node: NodeItem, advance_config: AdvanceConfig) -> dict:
     proxy_auto_raw_config = '''
 {
 	"dns": {
 		"servers": [
-			"8.8.8.8",
-			"8.8.4.4",
+			"<str:remote_dns>",
 			{
-				"address": "223.5.5.5",
+				"address": "<str:local_dns>",
 				"domains": [
 					"geosite:cn",
 					"ntp.org",
@@ -333,22 +317,6 @@ def gen_proxy_auto(node: NodeItem) -> dict:
 				"network": "udp",
 				"outboundTag": "direct",
 				"port": 123,
-				"type": "field"
-			},
-			{
-				"ip": [
-					"223.5.5.5",
-					"223.6.6.6"
-				],
-				"outboundTag": "direct",
-				"type": "field"
-			},
-			{
-				"ip": [
-					"8.8.8.8",
-					"8.8.4.4"
-				],
-				"outboundTag": "proxy",
 				"type": "field"
 			},
 			{
@@ -385,7 +353,59 @@ def gen_proxy_auto(node: NodeItem) -> dict:
 }
 '''
     config = json.loads(proxy_auto_raw_config)
-    config['dns']['servers'][2]['domains'][3] = node.add
+    update_dns_config(config, advance_config)
+    config['dns']['servers'][1]['domains'][3] = node.add
 
     config.update(gen_proxy_outbands(node))
     return config
+
+def default_dns_local() -> str:
+    return '223.5.5.5'
+
+def default_dns_remote() -> str:
+    return '8.8.8.8'
+
+def update_local_dns_config(config:dict, local_dns:str):
+    config['dns']['servers'][1]['address'] = local_dns
+
+    local_rule_raw = '''
+{
+    "ip": [
+        "223.5.5.5"
+    ],
+    "outboundTag": "direct",
+    "type": "field"
+}'''
+    local_dns_rule = json.loads(local_rule_raw)
+    local_dns_rule['ip'][0] = local_dns
+
+    rules : list = config['routing']['rules']
+    rules.append(local_dns_rule)
+
+def update_remote_dns_config(config:dict, remote_dns:str):
+    config['dns']['servers'][0] = remote_dns
+    remote_rule_raw = '''
+{
+    "ip": [
+        "8.8.8.8"
+    ],
+    "outboundTag": "proxy",
+    "type": "field"
+}
+'''
+    remote_dns_rule = json.loads(remote_rule_raw)
+    remote_dns_rule['ip'][0] = remote_dns
+
+    rules : list = config['routing']['rules']
+    rules.append(remote_dns_rule)
+
+def update_dns_config(config:dict, advance_config:AdvanceConfig):
+    if len(advance_config.local_dns):
+        update_local_dns_config(config, advance_config.local_dns)
+    else:
+        update_local_dns_config(config, default_dns_local())
+
+    if len(advance_config.remote_dns):
+        update_remote_dns_config(config, advance_config.remote_dns)
+    else:
+        update_remote_dns_config(config, default_dns_remote())

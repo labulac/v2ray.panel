@@ -49,7 +49,7 @@ class V2rayController:
         return version
 
     def update(self) -> bool:
-        r = requests.get('https://api.github.com/repos/v2ray/v2ray-core/releases/latest')
+        r = requests.get('https://api.github.com/repos/v2fly/v2ray-core/releases/latest')
         r = r.json()
         version = r['tag_name']
 

@@ -96,7 +96,7 @@
     function refresh() {
         $.get("/subscribe_list", function (subscribe) {
             $("#last_subscribe").html(subscribe["last_subscribe"]);
-            groups = subscribe["groups"];
+            var groups = Object.values(subscribe["groups"]);
             if (groups.length === 0) {
                 $("#update_all_subscribe").hide();
                 $("#ping_test").hide();
@@ -127,7 +127,7 @@
                 tbody.append(node_head_row);
                 node_head_row.show();
 
-                node_list = group["list"];
+                node_list = group["nodes"];
                 for (var j = 0; j < node_list.length; j++) {
                     node_data = node_list[j];
 
@@ -310,7 +310,7 @@
         if (g_ping_cache != null) {
             for (var i = 0; i < g_ping_cache.length; i++) {
                 group = g_ping_cache[i];
-                list = group["list"];
+                list = group["nodes"];
                 url = group["subscribe"];
                 $("tbody").find(`tr[url='${url}']`).each(function (index, row) {
                     node_name = $(row).find(".node_name").text();

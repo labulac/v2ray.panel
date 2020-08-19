@@ -9,11 +9,17 @@ from .base_data_item import BaseDataItem
 
 class AppConfig(BaseDataItem):
     def __init__(self):
-        self.user = None
-        self.password = None
-        self.port = None
-        self.proxy_mode = None
+        self.user = "admin"
+        self.password = "admin"
+        self.port = 1086
+        self.proxy_mode = 1
         self.inited = False
+
+    def load(self):
+        obj = super().load()
+        if obj == self:
+            self.save()
+        return obj
 
     def filename(self):
         return 'config/app_config.json'

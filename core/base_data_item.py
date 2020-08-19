@@ -7,26 +7,28 @@ Desc:
 """
 import json
 import os.path
+import jsonpickle
 
 class BaseDataItem:
     def filename(self):
         return ''
 
-    def update(self, data):
-        for key in data:
-            if hasattr(self, key):
-                setattr(self, key, data[key])
-
-    def dump(self):
-        return vars(self)
+    def dump(self, pure=True):
+        data = json.loads(jsonpickle.encode(self, unpicklable=not pure))
+        return data
 
     def load(self):
         if os.path.exists(self.filename()):
             with open(self.filename()) as f:
-                data = json.load(f)
-                self.update(data)
+                return jsonpickle.decode(f.read())
+        return self
+
+    def load_data(self, data: dict):
+        pickle_data: dict = self.dump(pure=False)
+        pickle_data.update(data)
+        return jsonpickle.decode(json.dumps(pickle_data))
 
     def save(self):
-        data = self.dump()
+        raw = jsonpickle.encode(self, indent=4)
         with open(self.filename(), 'w+') as f:
-            json.dump(data, f, indent=4)
+            f.write(raw)

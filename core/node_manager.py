@@ -18,63 +18,20 @@ from tcp_latency import measure_latency
 from concurrent import futures
 from .keys import Keyword as K
 from .node_item import NodeItem
+from .base_data_item import BaseDataItem
 
 class NodeGroup:
     def __init__(self):
         self.subscribe: str = ''
         self.nodes: List[NodeItem] = []
 
-    def load(self, data):
-        self.subscribe = data[K.subscribe]
-        for n in data[K.list]:
-            node = NodeItem()
-            node.update(n)
-            self.nodes.append(node)
-
-    def dump(self):
-        data = {}
-        data[K.subscribe] = self.subscribe
-        list = []
-        for node in self.nodes:
-            n = node.dump()
-            list.append(n)
-        data[K.list] = list
-        return data
-
-class NodeManager:
+class NodeManager(BaseDataItem):
     def __init__(self):
         self.last_subscribe = ''
-        self.groups: Dict[NodeGroup]= {}
-        self.file = 'config/nodes.json'
+        self.groups: Dict= {}
 
-    def load(self):
-        if os.path.isfile(self.file):
-            with open(self.file) as f:
-                data = json.load(f)
-                self.last_subscribe = data[K.last_subscribe]
-                groups = data[K.groups]
-                for group in groups:
-                    g = NodeGroup()
-                    g.load(group)
-                    self.groups[g.subscribe] = g
-
-    def dump(self):
-        data = {}
-        data[K.last_subscribe] = self.last_subscribe
-
-        groups = []
-        for url in self.groups.keys():
-            g = self.groups[url]
-            group = g.dump()
-            groups.append(group)
-        data[K.groups] = groups
-
-        return data
-
-    def save(self):
-        data = self.dump()
-        with open(self.file, 'w+') as f:
-            json.dump(data, f, indent=4)
+    def filename(self):
+        return 'config/nodes.json'
 
     def update_group(self, group: NodeGroup):
         url = group.subscribe
@@ -88,8 +45,7 @@ class NodeManager:
                 line = line[len(K.vmess_scheme):]
                 line = base64.b64decode(line).decode('utf8')
                 data = json.loads(line)
-                node = NodeItem()
-                node.update(data)
+                node = NodeItem().load_data(data)
                 group.nodes.append(node)
 
     def update(self, url):
@@ -150,14 +106,14 @@ class NodeManager:
 
                 group_result = {}
                 group_result[K.subscribe] = url
-                list = {}
+                nodes = {}
                 for future in futures_to_hosts.keys():
                     delay = future.result()
                     if delay == None:
                         delay = -1
-                    list[futures_to_hosts[future]] = int(delay)
+                    nodes[futures_to_hosts[future]] = int(delay)
 
-                group_result[K.list] = list
+                group_result[K.nodes] = nodes
                 results.append(group_result)
 
         return results

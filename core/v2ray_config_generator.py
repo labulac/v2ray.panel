@@ -8,6 +8,7 @@ Desc:
 import json
 from .proxy_mode import ProxyMode
 from .node_item import NodeItem
+from .dns_config import DnsConfig
 from .advance_config import AdvanceConfig
 
 def gen_config(node: NodeItem, all_nodes: list, mode: int, advance_config: AdvanceConfig) -> str:
@@ -359,12 +360,6 @@ def gen_proxy_auto(node: NodeItem, advance_config: AdvanceConfig) -> dict:
     config.update(gen_proxy_outbands(node))
     return config
 
-def default_dns_local() -> str:
-    return '223.5.5.5'
-
-def default_dns_remote() -> str:
-    return '8.8.8.8'
-
 def update_local_dns_config(config:dict, local_dns:str):
     config['dns']['servers'][1]['address'] = local_dns
 
@@ -400,12 +395,12 @@ def update_remote_dns_config(config:dict, remote_dns:str):
     rules.append(remote_dns_rule)
 
 def update_dns_config(config:dict, advance_config:AdvanceConfig):
-    if len(advance_config.local_dns):
-        update_local_dns_config(config, advance_config.local_dns)
+    if len(advance_config.dns.local_dns):
+        update_local_dns_config(config, advance_config.dns.local_dns)
     else:
-        update_local_dns_config(config, default_dns_local())
+        update_local_dns_config(config, DnsConfig.default_local_dns)
 
-    if len(advance_config.remote_dns):
-        update_remote_dns_config(config, advance_config.remote_dns)
+    if len(advance_config.dns.remote_dns):
+        update_remote_dns_config(config, advance_config.dns.remote_dns)
     else:
-        update_remote_dns_config(config, default_dns_remote())
+        update_remote_dns_config(config, DnsConfig.default_remote_dns)

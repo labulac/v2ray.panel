@@ -7,28 +7,33 @@ Desc:
 """
 import psutil
 import subprocess
+import os
+import os.path
 
 from .app_config import AppConfig
 from .node_item import NodeItem
 from .v2ray_controller import V2rayController
-from . import v2ray_config_generator
 from .node_manager import NodeManager
 from .keys import Keyword as K
 from .advance_config import AdvanceConfig
 
 class CoreService:
-    app_config = AppConfig()
-    node_config = NodeItem()
-    advance_config = AdvanceConfig()
+    app_config : AppConfig = None
+    node_config : NodeItem = None
+    advance_config : AdvanceConfig = None
     v2ray = V2rayController()
     node_manager = NodeManager()
 
     @classmethod
     def load(cls):
-        cls.app_config.load()
-        cls.node_config.load()
-        cls.advance_config.load()
-        cls.node_manager.load()
+        config_path = 'config/'
+        if not os.path.exists(config_path):
+            os.mkdir(config_path)
+
+        cls.app_config = AppConfig().load()
+        cls.node_config = NodeItem().load()
+        cls.advance_config = AdvanceConfig().load()
+        cls.node_manager = NodeManager().load()
 
     @classmethod
     def status(cls) -> dict:
@@ -101,26 +106,18 @@ class CoreService:
         return node.link
 
     @classmethod
-    def default_local_dns(cls):
-        return v2ray_config_generator.default_dns_local()
-
-    @classmethod
     def set_local_dns(cls, local_dns: str):
         result = True
-        cls.advance_config.local_dns = local_dns
+        cls.advance_config.dns.local_dns = local_dns
         result = cls.v2ray.apply_node(cls.node_config, cls.node_manager.all_nodes(), cls.app_config.proxy_mode, cls.advance_config, cls.v2ray.running())
         if result:
             cls.advance_config.save()
         return result
 
     @classmethod
-    def default_remote_dns(cls):
-        return v2ray_config_generator.default_dns_remote()
-
-    @classmethod
     def set_remote_dns(cls, remote_dns: str):
         result = True
-        cls.advance_config.remote_dns = remote_dns
+        cls.advance_config.dns.remote_dns = remote_dns
         result = cls.v2ray.apply_node(cls.node_config, cls.node_manager.all_nodes(), cls.app_config.proxy_mode, cls.advance_config, cls.v2ray.running())
         if result:
             cls.advance_config.save()

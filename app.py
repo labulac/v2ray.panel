@@ -5,6 +5,7 @@ from flask import Flask, render_template, jsonify, request
 from flask_basicauth import BasicAuth
 
 from core.keys import Keyword as K
+from core.dns_config import DnsConfig
 from core.core_service import CoreService
 
 CoreService.load()
@@ -192,14 +193,14 @@ def delete_node_api():
 
 @app.route('/get_advance_config')
 def get_advance_config_api():
-    dns = {
-        K.default_local : CoreService.default_local_dns(),
-        K.default_remote : CoreService.default_remote_dns(),
-        K.local : CoreService.advance_config.local_dns,
-        K.remote : CoreService.advance_config.remote_dns
-    }
+    config = CoreService.advance_config.dump()
+    config[K.dns].update({
+        K.default_local: DnsConfig.default_local_dns,
+        K.default_remote: DnsConfig.default_remote_dns,
+    })
+    config.update({ K.result: K.ok})
 
-    return jsonify({ K.result: K.ok, 'dns': dns })
+    return jsonify(config)
 
 @app.route('/advance_set_dns')
 def advance_set_dns_api():

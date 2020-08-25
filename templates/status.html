@@ -145,6 +145,7 @@
             mode = data["proxy_mode"];
             $("#proxy_mode").prop("selectedIndex", mode);
             $("#v2ray_current_ver").html(data["version"]);
+            $("#v2ray_new_ver").html(window.g_new_version);
             $("#remark").html(data["ps"]);
             $("#host").html(data["add"]);
 
@@ -253,10 +254,10 @@
     function check_v2ray_new_ver() {
         message("正在查询...");
         $.get("/check_v2ray_new_ver").done(function (data) {
-            var new_version = data["version"];
-            $("#v2ray_new_ver").html(new_version)
+            window.g_new_version = data["version"];
+            $("#v2ray_new_ver").html(window.g_new_version)
             var current_version = $("#v2ray_current_ver").html();
-            if (new_version === current_version) {
+            if (window.g_new_version === current_version) {
                 message("当前已是最新版本无需更新");
                 $("#check_update").show();
                 $("#update").hide();

@@ -298,16 +298,17 @@
         });
     }
 
-    var g_ping_cache = null;
     function ping_test() {
+        message("正在测试，请稍候...")
         $.get("/subscribe_ping_all", function (data) {
-            g_ping_cache = data["groups"];
+            window.g_ping_cache = data["groups"];
             update_ping_result();
+            message("测试完成")
         });
     }
 
     function update_ping_result() {
-        if (g_ping_cache != null) {
+        if (window.g_ping_cache != null) {
             for (var i = 0; i < g_ping_cache.length; i++) {
                 group = g_ping_cache[i];
                 list = group["nodes"];

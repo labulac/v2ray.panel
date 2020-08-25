@@ -37,10 +37,6 @@ def subscribe_page():
 def advance_page():
     return render_template("advance.html")
 
-@app.route('/app.html')
-def app_page():
-    return render_template("app.html")
-
 @app.route('/log.html')
 def log_page():
     return render_template("log.html")

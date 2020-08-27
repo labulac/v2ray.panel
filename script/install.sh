@@ -49,6 +49,8 @@ LimitNOFILE=1000000
 WantedBy=multi-user.target
 EOF
 
+systemctl daemon-reload
+
 bash update_v2ray.sh
 
 mkdir -p /etc/v2ray/

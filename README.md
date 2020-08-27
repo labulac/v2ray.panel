@@ -64,4 +64,4 @@ static domain_name_servers=192.168.66.1
 ```
 
 然后设置路由器的DHCP网关为 192.168.66.200
-![4.png](pic/4.png)
+![router.png](pic/router.png)

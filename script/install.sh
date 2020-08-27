@@ -30,8 +30,26 @@ exit 0
 EOF
 
 #install V2ray
-# curl -L -s https://install.direct/go.sh | bash
-bash update_v2ray.sh v4.27.0
+cat>>/etc/systemd/system/v2ray.service<<EOF
+[Unit]
+Description=V2Ray Service
+After=network.target nss-lookup.target
+
+[Service]
+User=root
+CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+NoNewPrivileges=true
+Environment=V2RAY_LOCATION_ASSET=/usr/local/share/v2ray/
+ExecStart=/usr/local/bin/v2ray -config /etc/v2ray/config.json
+LimitNPROC=500
+LimitNOFILE=1000000
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+bash update_v2ray.sh
 
 mkdir -p /etc/v2ray/
 touch /etc/v2ray/config.json

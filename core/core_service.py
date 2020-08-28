@@ -70,13 +70,9 @@ class CoreService:
         return result
 
     @classmethod
-    def add_subscribe(cls, url: str):
-        cls.node_manager.add_subscribe(url)
-
-    @classmethod
     def apply_node(cls, url:str, index: int) -> bool:
         result = False
-        node = cls.node_manager.groups[url].nodes[index]
+        node = cls.node_manager.find_node(url, index)
         if cls.v2ray.apply_node(node, cls.node_manager.all_nodes(), cls.app_config.proxy_mode, cls.advance_config, True):
             cls.node_config = node
             cls.node_config.save()
@@ -101,11 +97,6 @@ class CoreService:
         return result
 
     @classmethod
-    def node_link(cls, url: str, index: int) ->bool:
-        node = cls.node_manager.groups[url].nodes[index]
-        return node.link
-
-    @classmethod
     def set_local_dns(cls, local_dns: str):
         result = True
         cls.advance_config.dns.local_dns = local_dns
@@ -122,6 +113,3 @@ class CoreService:
         if result:
             cls.advance_config.save()
         return result
-
-
-

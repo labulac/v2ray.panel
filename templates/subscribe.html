@@ -43,6 +43,17 @@
 
                     </td>
                 </tr>
+                <tr id="manual_template" class="mdui-color-light-blue-50" style="display: none">
+                    <td>手动节点</td>
+                    <td></td>
+                    <td colspan="3">
+                        <div class="mdui-row">
+                            <div class="mdui-col-sm-3">
+                                <button class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent mdui-ripple" onclick="add_manual_node()">添加</button>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
                 <tr id="node_header_template" class="mdui-typo-caption-opacity" style="display: none">
                     <td>序号</td>
                     <td>名称</td>
@@ -96,7 +107,7 @@
     function refresh() {
         $.get("/subscribe_list", function (subscribe) {
             $("#last_subscribe").html(subscribe["last_subscribe"]);
-            var groups = Object.values(subscribe["groups"]);
+            var groups = Object.values(subscribe["subscribes"]);
             if (groups.length === 0) {
                 $("#update_all_subscribe").hide();
                 $("#ping_test").hide();
@@ -109,81 +120,113 @@
             $("tr[id^='real_subscribe']").remove();
             $("tr[id^='real_header']").remove();
             $("tr[id^='real_node']").remove();
+            $("tr[id^='real_manual']").remove();
 
+            var node_running = subscribe["ps"];
+            var tbody = $("tbody");
 
-            node_running = subscribe["ps"];
-            tbody = $("tbody");
-            for (var i = 0; i < groups.length; i++) {
-                group = groups[i];
-                url = group["subscribe"];
+            function make_group_head(url, index) {
                 var url_row = $("#subscribe_template").clone();
                 url_row.find(".url").html(url);
-                url_row.attr("id", "real_subscribe_" + (i + 1).toString());
+                url_row.attr("id", "real_subscribe_" + index.toString());
                 tbody.append(url_row);
                 url_row.show();
-
-                node_head_row = $("#node_header_template").clone();
-                node_head_row.attr("id", "real_header_" + (i + 1).toString());
-                tbody.append(node_head_row);
-                node_head_row.show();
-
-                node_list = group["nodes"];
-                for (var j = 0; j < node_list.length; j++) {
-                    node_data = node_list[j];
-
-                    var node_row = $("#node_template").clone();
-                    node_row.attr("id", "real_node_" + (j + 1).toString());
-                    node_row.attr("url", url);
-                    node_row.find(".node_index").html((j + 1).toString());
-                    node_row.find(".node_name").html(node_data["ps"]);
-                    node_row.find(".node_addr").html(node_data["add"]);
-                    if (node_data["ps"] === node_running) {
-                        node_row.find(".apply_node").find("i").html("vpn_key");
-                    }
-
-                    tbody.append(node_row);
-                    node_row.show();
-                }
             }
 
-            $(".update_subscribe").click(function () {
-                url = $(this).closest("tr").find(".url").text();
-                update_subscribe(url);
+            function make_manual_head() {
+                var manual_head = $("#manual_template").clone();
+                manual_head.attr("id", "real_manual");
+                tbody.append(manual_head);
+                manual_head.show();
+            }
+
+            function make_node_head(index) {
+                var node_head_row = $("#node_header_template").clone();
+                node_head_row.attr("id", "real_header_" + index.toString());
+                tbody.append(node_head_row);
+                node_head_row.show();
+            }
+            
+            function make_node_row(url, node_data, group_idnex, node_index) {
+                var node_row = $("#node_template").clone();
+                node_row.attr("id", "real_node_" + group_idnex.toString() + "_" + node_index.toString());
+                node_row.attr("url", url);
+                node_row.find(".node_index").html(node_index.toString());
+                node_row.find(".node_name").html(node_data["ps"]);
+                node_row.find(".node_addr").html(node_data["add"]);
+                if (node_data["ps"] === node_running) {
+                    node_row.find(".apply_node").find("i").html("vpn_key");
+                }
+
+                tbody.append(node_row);
+                node_row.show();
+            }
+
+            function bind_node_row_event() {
+                $(".update_subscribe").click(function () {
+                    var url = $(this).closest("tr").find(".url").text();
+                    update_subscribe(url);
+                })
+
+                $(".remove_subscribe").click(function () {
+                    var url = $(this).closest("tr").find(".url").text();
+                    remove_subscribe(url);
+                })
+
+                $(".apply_node").click(function () {
+                    var row = $(this).closest("tr");
+                    var url = row.attr("url");
+                    var node_index = parseInt(row.find(".node_index").text()) - 1;
+                    apply_node(url, node_index);
+                });
+
+                $(".get_node_link").click(function () {
+                    var row = $(this).closest("tr");
+                    var url = row.attr("url");
+                    var node_index = parseInt(row.find(".node_index").text()) - 1;
+                    get_node_link(url, node_index);
+                })
+
+                $(".get_node_qr").click(function () {
+                    var row = $(this).closest("tr");
+                    var url = row.attr("url");
+                    var node_index = parseInt(row.find(".node_index").text()) - 1;
+                    get_node_qr(url, node_index);
+                })
+
+                $(".delete_node").click(function () {
+                    var row = $(this).closest("tr");
+                    var url = row.attr("url");
+                    var node_index = parseInt(row.find(".node_index").text()) - 1;
+                    delete_node(url, node_index);
+                })
+            }
+
+            // main
+            groups.forEach(function (group) {
+                var url = group["subscribe"];
+                var i = groups.indexOf(group);
+                make_group_head(url, i + 1);
+                make_node_head(i + 1);
+
+                var node_list = group["nodes"];
+                node_list.forEach(function(node_data){
+                    var j = node_list.indexOf(node_data);
+                    make_node_row(url, node_data, i +1, j + 1);
+                } );
             })
 
-            $(".remove_subscribe").click(function () {
-                url = $(this).closest("tr").find(".url").text();
-                remove_subscribe(url);
-            })
+            make_manual_head();
+            var manuals = subscribe["manual_nodes"];
+            if (manuals.length > 0) {
+                make_node_head(groups.length + 1);
+                manuals.forEach(function (node_data) {
+                    var j = manuals.indexOf(node_data);
+                    make_node_row('manual', node_data, groups.length + 1,  j + 1);
+                })
+            }
 
-            $(".apply_node").click(function () {
-                row = $(this).closest("tr");
-                url = row.attr("url");
-                var node_index = parseInt(row.find(".node_index").text()) - 1;
-                apply_node(url, node_index);
-            });
-
-            $(".get_node_link").click(function () {
-                row = $(this).closest("tr");
-                url = row.attr("url");
-                var node_index = parseInt(row.find(".node_index").text()) - 1;
-                get_node_link(url, node_index);
-            })
-
-            $(".get_node_qr").click(function () {
-                row = $(this).closest("tr");
-                url = row.attr("url");
-                var node_index = parseInt(row.find(".node_index").text()) - 1;
-                get_node_qr(url, node_index);
-            })
-
-            $(".delete_node").click(function () {
-                row = $(this).closest("tr");
-                url = row.attr("url");
-                var node_index = parseInt(row.find(".node_index").text()) - 1;
-                delete_node(url, node_index);
-            })
-
+            bind_node_row_event();
             update_ping_result();
         });
     }
@@ -287,6 +330,25 @@
         });
     }
 
+    function add_manual_node() {
+        mdui.prompt("请输入节点链接（vmess://...）：", function (url) {
+            if (!url.length) {
+                return;
+            }
+            message("正在添加新的节点列表...");
+            $.get("/add_manual_node", {url:url}).done(function (data) {
+                if (check_result(data)) {
+                    message("添加成功");
+                }
+                else {
+                    message("添加失败");
+                }
+            }).always(function () {
+                refresh();
+            });
+        });
+    }
+
     function remove_subscribe(url) {
         mdui.confirm("确认删除？", function () {
             $.get("/remove_subscribe", {subscribe:url}).done(function (data) {
@@ -308,20 +370,21 @@
     }
 
     function update_ping_result() {
-        if (window.g_ping_cache != null) {
-            for (var i = 0; i < g_ping_cache.length; i++) {
-                group = g_ping_cache[i];
-                list = group["nodes"];
-                url = group["subscribe"];
-                $("tbody").find(`tr[url='${url}']`).each(function (index, row) {
-                    node_name = $(row).find(".node_name").text();
-                    delay = list[node_name];
+        if (window.g_ping_cache === undefined)
+            return;
+        window.g_ping_cache.forEach(function (group) {
+            list = group["nodes"];
+            url = group["subscribe"];
+            $("tbody").find(`tr[url='${url}']`).each(function (index, row) {
+                node_name = $(row).find(".node_name").text();
+                delay = list[node_name];
 
-                    td = $(row).find(".node_delay");
-                    td.removeClass("mdui-text-color-red");
-                    td.removeClass("mdui-text-color-green");
+                td = $(row).find(".node_delay");
+                td.removeClass("mdui-text-color-red");
+                td.removeClass("mdui-text-color-green");
 
-                    var content = "";
+                var content = "";
+                if (delay !== undefined) {
                     if (-1 === delay) {
                         content = "☹";
                         td.addClass("mdui-text-color-red");
@@ -330,9 +393,10 @@
                         content = String(delay) + " ms";
                         td.addClass("mdui-text-color-green");
                     }
-                    td.html(content);
-                });
-            }
-        }
+                }
+
+                td.html(content);
+            });
+        });
     }
 </script>

@@ -24,4 +24,6 @@ class Keyword:
     default_local = 'default_local'
     default_remote = 'default_remote'
     local = 'local'
-    remote= 'remote'
+    remote = 'remote'
+    manual = 'manual'
+    url = 'url'

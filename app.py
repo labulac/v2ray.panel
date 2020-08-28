@@ -101,11 +101,23 @@ def switch_proxy_mode_api():
     return jsonify({K.result: result})
 
 @app.route('/add_subscribe')
-def set_subscribe_api():
+def add_subscribe_api():
     result = K.failed
     try:
         url = request.args.get(K.subscribe)
-        CoreService.add_subscribe(url)
+        CoreService.node_manager.add_subscribe(url)
+        result = K.ok
+    except:
+        pass
+
+    return jsonify({K.result : result})
+
+@app.route('/add_manual_node')
+def add_manual_node_api():
+    result = K.failed
+    try:
+        url = request.args.get(K.url)
+        CoreService.node_manager.add_manual_node(url)
         result = K.ok
     except:
         pass
@@ -175,7 +187,7 @@ def get_node_link_api():
     url = request.args.get(K.subscribe)
     index = request.args.get(K.node_index)
     index = int(index)
-    link = CoreService.node_link(url, index)
+    link = CoreService.node_manager.find_node(url, index).link
     return jsonify({ K.result: K.ok,
                      K.node_link: link})
 

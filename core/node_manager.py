@@ -122,12 +122,13 @@ class NodeManager(BaseDataItem):
 
             results.append(group_result)
 
-        manual_nodes = self.ping_test_group(self.manual_nodes)
-        manual_result = {
-            K.subscribe: K.manual,
-            K.nodes: manual_nodes
-        }
-        results.append(manual_result)
+        if len(self.manual_nodes):
+            manual_nodes = self.ping_test_group(self.manual_nodes)
+            manual_result = {
+                K.subscribe: K.manual,
+                K.nodes: manual_nodes
+            }
+            results.append(manual_result)
 
         return results
 

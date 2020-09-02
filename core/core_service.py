@@ -11,17 +11,16 @@ import os
 import os.path
 
 from .app_config import AppConfig
-from .node_item import NodeItem
-from .v2ray_controller import V2rayController
+from .v2ray_controller import V2rayController, make_controller
+
 from .node_manager import NodeManager
 from .keys import Keyword as K
-from .advance_config import AdvanceConfig
+from .v2ray_user_config import V2RayUserConfig
 
 class CoreService:
     app_config : AppConfig = None
-    node_config : NodeItem = None
-    advance_config : AdvanceConfig = None
-    v2ray = V2rayController()
+    user_config: V2RayUserConfig = V2RayUserConfig()
+    v2ray:V2rayController = make_controller()
     node_manager = NodeManager()
 
     @classmethod
@@ -31,9 +30,8 @@ class CoreService:
             os.mkdir(config_path)
 
         cls.app_config = AppConfig().load()
-        cls.node_config = NodeItem().load()
-        cls.advance_config = AdvanceConfig().load()
         cls.node_manager = NodeManager().load()
+        cls.user_config = V2RayUserConfig().load()
 
     @classmethod
     def status(cls) -> dict:
@@ -43,10 +41,10 @@ class CoreService:
         result = {
             K.running: running,
             K.version: version,
-            K.proxy_mode: cls.app_config.proxy_mode,
+            K.proxy_mode: cls.user_config.proxy_mode,
         }
 
-        node = cls.node_config.dump()
+        node = cls.user_config.node.dump()
         result.update(node)
         return result
 
@@ -73,13 +71,12 @@ class CoreService:
     def apply_node(cls, url:str, index: int) -> bool:
         result = False
         node = cls.node_manager.find_node(url, index)
-        if cls.v2ray.apply_node(node, cls.node_manager.all_nodes(), cls.app_config.proxy_mode, cls.advance_config, True):
-            cls.node_config = node
-            cls.node_config.save()
+        cls.user_config.node = node
+        if cls.v2ray.apply_node(cls.user_config, True):
+            cls.user_config.save()
 
             if not cls.app_config.inited:
-                subprocess.check_output("bash ./script/config_iptable.sh", shell=True)
-                subprocess.check_output("enable v2ray_iptable.service", shell=True)
+                cls.v2ray.enable_iptables()
                 cls.app_config.inited = True
                 cls.app_config.save()
 
@@ -88,28 +85,28 @@ class CoreService:
 
     @classmethod
     def switch_mode(cls, proxy_mode: int) -> bool:
+        cls.user_config.proxy_mode = proxy_mode
         result = True
-        result = cls.v2ray.apply_node(cls.node_config, cls.node_manager.all_nodes(), proxy_mode, cls.advance_config, cls.v2ray.running())
+        result = cls.v2ray.apply_node(cls.user_config, cls.v2ray.running())
         if result:
-            cls.app_config.proxy_mode = proxy_mode
-            cls.app_config.save()
+            cls.user_config.save()
 
         return result
 
     @classmethod
     def set_local_dns(cls, local_dns: str):
         result = True
-        cls.advance_config.dns.local_dns = local_dns
-        result = cls.v2ray.apply_node(cls.node_config, cls.node_manager.all_nodes(), cls.app_config.proxy_mode, cls.advance_config, cls.v2ray.running())
+        cls.user_config.advance_config.dns.local = local_dns
+        result = cls.v2ray.apply_node(cls.user_config, cls.v2ray.running())
         if result:
-            cls.advance_config.save()
+            cls.user_config.save()
         return result
 
     @classmethod
     def set_remote_dns(cls, remote_dns: str):
         result = True
-        cls.advance_config.dns.remote_dns = remote_dns
-        result = cls.v2ray.apply_node(cls.node_config, cls.node_manager.all_nodes(), cls.app_config.proxy_mode, cls.advance_config, cls.v2ray.running())
+        cls.user_config.advance_config.dns.remote = remote_dns
+        result = cls.v2ray.apply_node(cls.user_config, cls.v2ray.running())
         if result:
-            cls.advance_config.save()
+            cls.user_config.save()
         return result

@@ -12,7 +12,6 @@ class AppConfig(BaseDataItem):
         self.user = "admin"
         self.password = "admin"
         self.port = 1086
-        self.proxy_mode = 1
         self.inited = False
 
     def load(self):

@@ -11,7 +11,7 @@ import json
 import base64
 from .keys import Keyword as K
 
-class NodeItem(BaseDataItem):
+class Node(BaseDataItem):
     def __init__(self):
         self.add = None
         self.aid = None
@@ -24,9 +24,6 @@ class NodeItem(BaseDataItem):
         self.tls = None
         self.type = None
         self.v = None
-
-    def filename(self):
-        return 'config/node_config.json'
 
     @property
     def link(self):

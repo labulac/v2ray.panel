@@ -8,9 +8,9 @@ Desc:
 import textwrap
 import subprocess
 import requests
-from .node_item import NodeItem
+import sys
 from . import v2ray_config_generator
-from .advance_config import AdvanceConfig
+from .v2ray_user_config import V2RayUserConfig
 
 class V2rayController:
     def start(self) -> bool:
@@ -79,8 +79,8 @@ class V2rayController:
                 string += wrap + '<br>'
         return string
 
-    def apply_node(self, node: NodeItem, all_nodes:list, mode: int, advance_config: AdvanceConfig, restart: bool) -> bool:
-        config = v2ray_config_generator.gen_config(node, all_nodes, mode, advance_config)
+    def apply_node(self, user_config:V2RayUserConfig, restart: bool) -> bool:
+        config = v2ray_config_generator.gen_config(user_config)
         return self.apply_config(config, restart)
 
     def apply_config(self, config: str, restart: bool) -> bool:
@@ -91,3 +91,46 @@ class V2rayController:
         if restart:
             result = self.restart()
         return  result
+
+    def enable_iptables(self):
+        subprocess.check_output("bash ./script/config_iptable.sh", shell=True)
+        subprocess.check_output("systemctl enable v2ray_iptable.service", shell=True)
+
+class MokeV2rayController(V2rayController):
+    def start(self) -> bool:
+        return True
+
+    def stop(self) -> bool:
+        return True
+
+    def restart(self) -> bool:
+        return True
+
+    def running(self) -> bool:
+        return True
+
+    def version(self) -> str:
+        return 'v4.27.0'
+
+    def update(self) -> bool:
+        return True
+
+    def access_log(self) -> str:
+        return ''
+
+    def error_log(self) -> str:
+        return ''
+
+    def apply_config(self, config: str, restart: bool) -> bool:
+        with open('config/moke_config.json', 'w+') as f:
+            f.write(config)
+        return True
+
+    def enable_iptables(self):
+        return
+
+def make_controller():
+    if sys.platform == 'darwin':
+        return MokeV2rayController()
+    else:
+        return V2rayController()

@@ -55,12 +55,12 @@
     });
 
     function refresh() {
-        $.get("/get_advance_config", function (data) {
-            dns_config = data['dns'];
+        $.get("/get_user_config", function (data) {
+            dns_config = data['advance_config']['dns'];
             default_dns_local = dns_config["default_local"];
             default_dns_remote = dns_config["default_remote"];
-            dns_local = dns_config["local_dns"];
-            dns_remote = dns_config["remote_dns"];
+            dns_local = dns_config["local"];
+            dns_remote = dns_config["remote"];
 
             if (dns_local.length > 0) {
                 $("#local_dns").html(dns_local).removeClass("mdui-text-color-black-disabled");

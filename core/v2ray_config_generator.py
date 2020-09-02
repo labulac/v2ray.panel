@@ -6,22 +6,18 @@ Date:       2020年7月30日  31周星期四 15:52
 Desc:
 """
 import json
-from .proxy_mode import ProxyMode
-from .node_item import NodeItem
-from .dns_config import DnsConfig
-from .advance_config import AdvanceConfig
+from .node import Node
+from .v2ray_user_config import V2RayUserConfig
 
-def gen_config(node: NodeItem, all_nodes: list, mode: int, advance_config: AdvanceConfig) -> str:
+def gen_config(user_config:V2RayUserConfig) -> str:
     config = gen_basic()
     detail = None
-    if mode == ProxyMode.Direct.value:
-        detail = gen_direct(node)
-    elif mode == ProxyMode.ProxyAuto.value:
-        detail = gen_proxy_auto(node, advance_config)
-        append_all_nodes_rules(detail, all_nodes)
-    elif mode == ProxyMode.ProxyGlobal.value:
-        detail = gen_proxy_global(node, advance_config)
-        append_all_nodes_rules(detail, all_nodes)
+    if user_config.proxy_mode == V2RayUserConfig.ProxyMode.Direct.value:
+        detail = gen_direct(user_config.node)
+    elif user_config.proxy_mode == V2RayUserConfig.ProxyMode.ProxyAuto.value:
+        detail = gen_proxy_auto(user_config.node, user_config.advance_config)
+    elif user_config.proxy_mode == V2RayUserConfig.ProxyMode.ProxyGlobal.value:
+        detail = gen_proxy_global(user_config.node, user_config.advance_config)
 
     config.update(detail)
     return json.dumps(config, indent=4)
@@ -76,27 +72,7 @@ def gen_basic() -> dict:
     config = json.loads(basic_raw_config)
     return config
 
-def append_all_nodes_rules(config: dict, all_nodes:list):
-    raw_config ='''
-{
-    "domain": [],
-    "outboundTag": "direct",
-    "type": "field"
-}'''
-    nodes_rule = json.loads(raw_config)
-    domains:list = nodes_rule['domain']
-
-    hosts = set()
-    for node in all_nodes:
-        hosts.add(node.add)
-
-    for host in hosts:
-        domains.append(host)
-
-    rules: list = config['routing']['rules']
-    rules.append(nodes_rule)
-
-def gen_direct(node: NodeItem) -> dict:
+def gen_direct(node: Node) -> dict:
     direct_raw_config = '''
 {
 	"outbounds": [
@@ -114,7 +90,7 @@ def gen_direct(node: NodeItem) -> dict:
     config = json.loads(direct_raw_config)
     return config
 
-def gen_proxy_outbands(node: NodeItem) -> dict:
+def gen_proxy_outbands(node: Node) -> dict:
     proxy_global_raw_config = '''
 {
     "outbounds": [
@@ -214,7 +190,7 @@ def gen_proxy_outbands(node: NodeItem) -> dict:
 
     return config
 
-def gen_proxy_global(node: NodeItem, advance_config: AdvanceConfig) -> dict:
+def gen_proxy_global(node: Node, advance_config: V2RayUserConfig.AdvanceConfig) -> dict:
     proxy_global_raw_config = '''
 {	
     "dns": {
@@ -282,7 +258,7 @@ def gen_proxy_global(node: NodeItem, advance_config: AdvanceConfig) -> dict:
     config.update(gen_proxy_outbands(node))
     return config
 
-def gen_proxy_auto(node: NodeItem, advance_config: AdvanceConfig) -> dict:
+def gen_proxy_auto(node: Node, advance_config: V2RayUserConfig.AdvanceConfig) -> dict:
     proxy_auto_raw_config = '''
 {
 	"dns": {
@@ -394,13 +370,13 @@ def update_remote_dns_config(config:dict, remote_dns:str):
     rules : list = config['routing']['rules']
     rules.append(remote_dns_rule)
 
-def update_dns_config(config:dict, advance_config:AdvanceConfig):
-    if len(advance_config.dns.local_dns):
-        update_local_dns_config(config, advance_config.dns.local_dns)
+def update_dns_config(config:dict, advance_config:V2RayUserConfig.AdvanceConfig):
+    if len(advance_config.dns.local):
+        update_local_dns_config(config, advance_config.dns.local)
     else:
-        update_local_dns_config(config, DnsConfig.default_local_dns)
+        update_local_dns_config(config, advance_config.dns.default_local)
 
-    if len(advance_config.dns.remote_dns):
-        update_remote_dns_config(config, advance_config.dns.remote_dns)
+    if len(advance_config.dns.remote):
+        update_remote_dns_config(config, advance_config.dns.remote)
     else:
-        update_remote_dns_config(config, DnsConfig.default_remote_dns)
+        update_remote_dns_config(config, advance_config.dns.default_remote)

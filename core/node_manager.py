@@ -16,19 +16,19 @@ import base64
 from tcp_latency import measure_latency
 from concurrent import futures
 from .keys import Keyword as K
-from .node_item import NodeItem
+from .node import Node
 from .base_data_item import BaseDataItem
 
 class NodeGroup:
     def __init__(self):
         self.subscribe: str = ''
-        self.nodes: List[NodeItem] = []
+        self.nodes: List[Node] = []
 
 class NodeManager(BaseDataItem):
     def __init__(self):
         self.last_subscribe = ''
         self.subscribes: Dict= {}
-        self.manual_nodes:List[NodeItem] = []
+        self.manual_nodes:List[Node] = []
 
     def filename(self):
         return 'config/nodes.json'
@@ -45,7 +45,7 @@ class NodeManager(BaseDataItem):
                 line = line[len(K.vmess_scheme):]
                 line = base64.b64decode(line).decode('utf8')
                 data = json.loads(line)
-                node = NodeItem().load_data(data)
+                node = Node().load_data(data)
                 group.nodes.append(node)
 
     def update(self, url):
@@ -86,11 +86,11 @@ class NodeManager(BaseDataItem):
             line = url[len(K.vmess_scheme):]
             line = base64.b64decode(line).decode('utf8')
             data = json.loads(line)
-            node = NodeItem().load_data(data)
+            node = Node().load_data(data)
             self.manual_nodes.append(node)
             self.save()
 
-    def find_node(self, url:str, index:int) -> NodeItem:
+    def find_node(self, url:str, index:int) -> Node:
         node = None
         if url == K.manual:
             node = self.manual_nodes[index]
@@ -132,7 +132,7 @@ class NodeManager(BaseDataItem):
 
         return results
 
-    def ping_test_group(self, nodes: List[NodeItem]) -> dict:
+    def ping_test_group(self, nodes: List[Node]) -> dict:
         def ping(host, port):
             delay = measure_latency(host, port, 1)[0]
             return delay

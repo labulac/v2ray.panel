@@ -121,7 +121,7 @@ ExecStart=/bin/bash /usr/local/V2ray.Fun/script/config_iptable.sh
 WantedBy=multi-user.target
 EOF
 
-systemctl enable v2ray_iptable.service
+systemctl disable v2ray_iptable.service
 
 # 
 chmod +x /etc/rc.local

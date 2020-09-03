@@ -9,8 +9,8 @@ import textwrap
 import subprocess
 import requests
 import sys
-from . import v2ray_config_generator
 from .v2ray_user_config import V2RayUserConfig
+from .v2ray_config import V2RayConfig
 
 class V2rayController:
     def start(self) -> bool:
@@ -80,7 +80,7 @@ class V2rayController:
         return string
 
     def apply_node(self, user_config:V2RayUserConfig, restart: bool) -> bool:
-        config = v2ray_config_generator.gen_config(user_config)
+        config = V2RayConfig.gen_config(user_config)
         return self.apply_config(config, restart)
 
     def apply_config(self, config: str, restart: bool) -> bool:

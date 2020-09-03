@@ -17,6 +17,18 @@ class V2RayUserConfig(BaseDataItem):
                 self.local = ''
                 self.remote = ''
 
+            def local_dns(self) -> str:
+                if len(self.local):
+                    return self.local
+                else:
+                    return self.default_local
+
+            def remote_dns(self) -> str:
+                if len(self.remote):
+                    return self.remote
+                else:
+                    return self.default_remote
+
         def __init__(self):
             self.dns: V2RayUserConfig.AdvanceConfig.DnsConfig = V2RayUserConfig.AdvanceConfig.DnsConfig()
 

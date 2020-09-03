@@ -290,10 +290,8 @@ class V2RayConfig(DontPickleNone):
         else:
             proxy = cls._make_outbound_proxy(user_config.node)
             block = cls._make_outbound_block()
-            config.outbounds.extend((proxy, direct, block))
-
-        dnsout = cls._make_outbound_dnsout()
-        config.add_outbound(dnsout)
+            dnsout = cls._make_outbound_dnsout()
+            config.outbounds.extend((proxy, direct, block, dnsout))
 
         # dns
         if user_config.proxy_mode != V2RayUserConfig.ProxyMode.Direct.value:
@@ -311,18 +309,15 @@ class V2RayConfig(DontPickleNone):
             config.dns.add_server(local_server)
 
         # routing
-        dnsout_rule = cls._make_dnsout_rule()
-        config.routing.rules.append(dnsout_rule)
-
         if user_config.proxy_mode != V2RayUserConfig.ProxyMode.Direct.value:
+            dnsout = cls._make_dnsout_rule()
             ntp = cls._make_ntp_rule()
             adblock = cls._make_adblock_rule()
             bt = cls._make_bt_rule()
             private = cls._make_private_rule()
             remote_dns = cls._make_ip_remote_dns_rule(user_config.advance_config.dns.remote_dns())
             local_dns = cls._make_ip_local_dns_rule(user_config.advance_config.dns.local_dns())
-
-            config.routing.rules.extend((ntp, adblock, bt, private, local_dns, remote_dns))
+            config.routing.rules.extend((dnsout, ntp, adblock, bt, private, local_dns, remote_dns))
 
             if user_config.proxy_mode == V2RayUserConfig.ProxyMode.ProxyAuto.value:
                 ip_cn = cls._make_ip_cn_rule()

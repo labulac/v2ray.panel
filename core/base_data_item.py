@@ -8,6 +8,7 @@ Desc:
 import json
 import os.path
 import jsonpickle
+import collections
 
 class BaseDataItem:
     def filename(self):
@@ -25,10 +26,27 @@ class BaseDataItem:
 
     def load_data(self, data: dict):
         pickle_data: dict = self.dump(pure=False)
-        pickle_data.update(data)
+        pickle_data = self._deep_update(pickle_data, data)
         return jsonpickle.decode(json.dumps(pickle_data))
 
     def save(self):
         raw = jsonpickle.encode(self, indent=4)
         with open(self.filename(), 'w+') as f:
             f.write(raw)
+
+    def _deep_update(self, dct, merge_dct, add_keys=False):
+        dct = dct.copy()
+        if not add_keys:
+            merge_dct = {
+                k: merge_dct[k]
+                for k in set(dct).intersection(set(merge_dct))
+            }
+
+        for k, v in merge_dct.items():
+            if (k in dct and isinstance(dct[k], dict)
+                    and isinstance(merge_dct[k], collections.Mapping)):
+                dct[k] = self._deep_update(dct[k], merge_dct[k], add_keys=add_keys)
+            else:
+                dct[k] = merge_dct[k]
+
+        return dct

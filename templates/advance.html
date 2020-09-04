@@ -19,10 +19,10 @@
                         <div class="mdui-row">
                             <div id="local_dns" class="mdui-col-sm-3"></div>
                             <div id="modify_local_dns" class="mdui-col-sm-2">
-                                <button class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent mdui-ripple" onclick="modify_local_dns()">修改</button>
+                                <button class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-a100 mdui-ripple" onclick="modify_local_dns()">修改</button>
                             </div>
                             <div id="clear_local_dns" class="mdui-col-sm-2" style="display: none">
-                                <button class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent mdui-ripple" onclick="clear_local_dns()">清除</button>
+                                <button class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-grey-300 mdui-ripple" onclick="clear_local_dns()">清除</button>
                             </div>
                         </div>
                     </td>
@@ -33,10 +33,29 @@
                         <div class="mdui-row">
                             <div id="remote_dns" class="mdui-col-sm-3"></div>
                             <div id="modify_remote_dns" class="mdui-col-sm-2">
-                                <button class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent mdui-ripple" onclick="modify_remote_dns()">修改</button>
+                                <button class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-a100 mdui-ripple" onclick="modify_remote_dns()">修改</button>
                             </div>
                             <div id="clear_remote_dns" class="mdui-col-sm-2" style="display: none">
-                                <button class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent mdui-ripple" onclick="clear_remote_dns()">清除</button>
+                                <button class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-grey-300 mdui-ripple" onclick="clear_remote_dns()">清除</button>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2" class="mdui-typo-caption-opacity">提交</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        <div class="mdui-row">
+                            <div id="discard" class="mdui-col-sm-2" style="display: none">
+                                <button class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-grey-300 mdui-ripple" onclick="discard_config()">放弃</button>
+                            </div>
+                            <div id="apply" class="mdui-col-sm-2" style="display: none">
+                                <button class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent mdui-ripple" onclick="apply_advance_config()">应用</button>
+                            </div>
+                            <div id="reset" class="mdui-col-sm-2">
+                                <button class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-red-400 mdui-ripple" onclick="reset_advance_config()">重置</button>
                             </div>
                         </div>
                     </td>
@@ -51,105 +70,134 @@
 <script type="text/javascript">
     //# sourceURL=advance.js
     $(document).ready(function () {
-        refresh()
+        refresh_remote()
     });
 
-    function refresh() {
-        $.get("/get_user_config", function (data) {
-            dns_config = data['advance_config']['dns'];
-            default_dns_local = dns_config["default_local"];
-            default_dns_remote = dns_config["default_remote"];
-            dns_local = dns_config["local"];
-            dns_remote = dns_config["remote"];
-
-            if (dns_local.length > 0) {
-                $("#local_dns").html(dns_local).removeClass("mdui-text-color-black-disabled");
-                $("#clear_local_dns").show();
-            }
-            else {
-                $("#local_dns").html(default_dns_local).addClass("mdui-text-color-black-disabled");
-                $("#clear_local_dns").hide();
-            }
-
-            if (dns_remote.length > 0) {
-                $("#remote_dns").html(dns_remote).removeClass("mdui-text-color-black-disabled");
-                $("#clear_remote_dns").show();
-            }
-            else {
-                $("#remote_dns").html(default_dns_remote).addClass("mdui-text-color-black-disabled");
-                $("#clear_remote_dns").hide();
-            }
+    var g_config_remote = null;
+    var g_config_local = null;
+    function refresh_remote() {
+        $.get("/get_advance_config", function (data) {
+            g_config_remote = data["advance_config"];
+            g_config_local = JSON.parse(JSON.stringify(g_config_remote));
+            refresh_local();
         });
+    }
+
+    function refresh_local() {
+        var change =  JSON.stringify(g_config_remote) !== JSON.stringify(g_config_local)
+        if (change) {
+            $('#discard').show();
+            $('#apply').show();
+        }
+        else {
+            $('#discard').hide();
+            $('#apply').hide();
+        }
+
+        dns_config = g_config_local["dns"];
+        default_dns_local = dns_config["default_local"];
+        default_dns_remote = dns_config["default_remote"];
+        dns_local = dns_config["local"];
+        dns_remote = dns_config["remote"];
+
+        if (dns_local.length > 0) {
+            $("#local_dns").html(dns_local).removeClass("mdui-text-color-black-disabled");
+            $("#clear_local_dns").show();
+        }
+        else {
+            $("#local_dns").html(default_dns_local).addClass("mdui-text-color-black-disabled");
+            $("#clear_local_dns").hide();
+        }
+
+        if (dns_remote.length > 0) {
+            $("#remote_dns").html(dns_remote).removeClass("mdui-text-color-black-disabled");
+            $("#clear_remote_dns").show();
+        }
+        else {
+            $("#remote_dns").html(default_dns_remote).addClass("mdui-text-color-black-disabled");
+            $("#clear_remote_dns").hide();
+        }
     }
     
     function modify_local_dns() {
         mdui.prompt("请输入国内 DNS 地址：", function (dns) {
+            dns = dns.trim();
             if (!dns.length) {
                 return;
             }
 
-            message("正在设置...")
-            $.get("advance_set_dns", {local:dns}).done(function (data) {
-                if (check_result(data)) {
-                    message("设置成功");
-                }
-                else {
-                    message("设置失败");
-                }
-            }).always(function () {
-                refresh();
-            })
+            dns_config = g_config_local["dns"];
+            dns_config["local"] = dns
+            refresh_local();
         });
     }
 
     function clear_local_dns() {
-        message("正在设置...")
-
-        $.get("advance_set_dns", {local:""}).done(function (data) {
-            if (check_result(data)) {
-                message("设置成功");
-            }
-            else {
-                message("设置失败");
-            }
-        }).always(function () {
-            refresh();
-        })
+        dns_config = g_config_local["dns"];
+        dns_config["local"] = ""
+        refresh_local();
     }
     
     function modify_remote_dns() {
         mdui.prompt("请输入国外 DNS 地址：", function (dns) {
+            dns = dns.trim();
             if (!dns.length) {
                 return;
             }
 
-            message("正在设置...")
-            $.get("advance_set_dns", {remote:dns}).done(function (data) {
-                if (check_result(data)) {
-                    message("设置成功");
-                }
-                else {
-                    message("设置失败");
-                }
-            }).always(function () {
-                refresh();
-            })
+            dns_config = g_config_local["dns"];
+            dns_config["remote"] = dns
+            refresh_local();
         });
     }
     
     function clear_remote_dns() {
-        message("正在设置...")
+        dns_config = g_config_local["dns"];
+        dns_config["remote"] = ""
+        refresh_local();
+    }
 
-        $.get("advance_set_dns", {remote:""}).done(function (data) {
+    function discard_config() {
+        g_config_local = JSON.parse(JSON.stringify(g_config_remote));
+        refresh_local();
+    }
+
+    function apply_advance_config() {
+        pop_toast("正在应用高级配置...");
+        $.ajax({
+            url: "/set_advance_config",
+            type: "POST",
+            dataType: "json",
+            contentType: "application/json;charset=utf-8",
+            data: JSON.stringify(g_config_local)
+        }).done(function (data) {
             if (check_result(data)) {
-                message("设置成功");
+                update_toast("应用成功")
             }
             else {
-                message("设置失败");
+                update_toast("应用失败")
             }
         }).always(function () {
-            refresh();
-        })
+            close_toast();
+            refresh_remote();
+        });
+    }
+
+    function reset_advance_config() {
+        mdui.confirm("确认重置高级配置为默认值？", function () {
+            pop_toast("正在重置高级配置为默认值...");
+            $.get('/reset_advance_config').done(function (data) {
+                if (check_result(data)) {
+                    update_toast("重置成功")
+                }
+                else {
+                    update_toast("重置失败")
+                }
+            }).always(function () {
+                close_toast();
+                refresh_remote();
+            });
+        });
     }
 
 </script>

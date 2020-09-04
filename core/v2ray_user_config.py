@@ -9,7 +9,7 @@ class V2RayUserConfig(BaseDataItem):
         ProxyAuto = 1
         ProxyGlobal = 2
 
-    class AdvanceConfig:
+    class AdvanceConfig(BaseDataItem):
         class DnsConfig:
             def __init__(self):
                 self.default_local = '223.5.5.5'

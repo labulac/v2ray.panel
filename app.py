@@ -198,26 +198,32 @@ def delete_node_api():
     CoreService.node_manager.delete_node(url, index)
     return jsonify({K.result: K.ok})
 
-@app.route('/get_user_config')
-def get_user_config_api():
-    config = CoreService.user_config.dump()
-    config.update({ K.result: K.ok})
-    return jsonify(config)
+@app.route('/get_advance_config')
+def get_advance_config_api():
+    config = CoreService.user_config.advance_config.dump()
+    result = {
+        'advance_config': config,
+        K.result: K.ok
+    }
+    return jsonify(result)
 
-@app.route('/advance_set_dns')
-def advance_set_dns_api():
-    local_dns = request.args.get('local')
-    remote_dns = request.args.get('remote')
+@app.route('/set_advance_config', methods=['POST'])
+def set_advance_config_api():
+    config = request.json
+    code = K.failed
+    result = CoreService.apply_advance_config(config)
+    if result:
+        code = K.ok
+    return jsonify({ K.result : code })
 
-    if local_dns != None:
-        if not CoreService.set_local_dns(local_dns):
-            return jsonify({ K.result : K.failed })
-
-    if remote_dns != None:
-        if not CoreService.set_remote_dns(remote_dns):
-            return jsonify({K.result: K.failed})
-
-    return jsonify({ K.result : K.ok })
+@app.route('/reset_advance_config')
+def reset_advance_config_api():
+    config = request.json
+    code = K.failed
+    result = CoreService.reset_advance_config()
+    if result:
+        code = K.ok
+    return jsonify({ K.result : code })
 
 @app.route('/get_access_log')
 def get_access_log_api():

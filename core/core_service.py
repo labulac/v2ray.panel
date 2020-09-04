@@ -94,19 +94,23 @@ class CoreService:
         return result
 
     @classmethod
-    def set_local_dns(cls, local_dns: str):
+    def apply_advance_config(cls, config:dict):
         result = True
-        cls.user_config.advance_config.dns.local = local_dns
+        new_advance = cls.user_config.advance_config.load_data(config)
+        cls.user_config.advance_config = new_advance
+        result = cls.v2ray.apply_node(cls.user_config, cls.v2ray.running())
+        if result:
+            cls.user_config.save()
+        return  result
+
+    @classmethod
+    def reset_advance_config(cls):
+        result = True
+        cls.user_config.advance_config = V2RayUserConfig.AdvanceConfig()
         result = cls.v2ray.apply_node(cls.user_config, cls.v2ray.running())
         if result:
             cls.user_config.save()
         return result
 
-    @classmethod
-    def set_remote_dns(cls, remote_dns: str):
-        result = True
-        cls.user_config.advance_config.dns.remote = remote_dns
-        result = cls.v2ray.apply_node(cls.user_config, cls.v2ray.running())
-        if result:
-            cls.user_config.save()
-        return result
+
+

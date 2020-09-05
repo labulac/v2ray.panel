@@ -326,11 +326,6 @@ class V2RayConfig(DontPickleNone):
             local_dns = cls._make_ip_local_dns_rule(user_config.advance_config.dns.local_dns())
             config.routing.rules.extend((dnsout, ntp, adblock, bt, private, local_dns, remote_dns))
 
-            if user_config.proxy_mode == V2RayUserConfig.ProxyMode.ProxyAuto.value:
-                ip_cn = cls._make_ip_cn_rule()
-                site_cn = cls._make_site_cn_rule()
-                config.routing.rules.extend((ip_cn, site_cn))
-
             # user rules
             direct_ips = []
             proxy_ips = []
@@ -371,6 +366,11 @@ class V2RayConfig(DontPickleNone):
             if len(block_domains):
                 rule = cls._make_user_domain_rule(block_domains, V2RayUserConfig.AdvanceConfig.Policy.Outbound.block)
                 config.routing.rules.append(rule)
+
+            if user_config.proxy_mode == V2RayUserConfig.ProxyMode.ProxyAuto.value:
+                ip_cn = cls._make_ip_cn_rule()
+                site_cn = cls._make_site_cn_rule()
+                config.routing.rules.extend((ip_cn, site_cn))
 
         raw_config = jsonpickle.encode(config, unpicklable=False, indent=4)
         return raw_config

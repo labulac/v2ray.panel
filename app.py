@@ -199,7 +199,7 @@ def delete_node_api():
 
 @app.route('/get_advance_config')
 def get_advance_config_api():
-    config = CoreService.user_config.advance_config.dump()
+    config = CoreService.user_config.advance_config.dump(pure=False)
     result = {
         'advance_config': config,
         K.result: K.ok

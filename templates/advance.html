@@ -125,9 +125,9 @@
                         </td>
                         <td>
                             <select id="select_policy_type" class="mdui-select" mdui-select="{position: 'bottom'}">
-                                <option value="0" selected>直连</option>
-                                <option value="1">代理</option>
-                                <option value="2">阻止</option>
+                                <option value="0" selected>🌐 直连</option>
+                                <option value="1">✈️ 代理</option>
+                                <option value="2">✂️ 阻止</option>
                             </select>
                         </td>
                     </tr>
@@ -235,9 +235,9 @@
             var content = policy['content'];
 
             var outbound_dic = {
-                direct: '直连',
-                proxy: '代理',
-                block: '阻止'
+                direct: '🌐',
+                proxy: '✈️',
+                block: '✂️'
             }
             var outbound = outbound_dic[policy['outbound']];
 

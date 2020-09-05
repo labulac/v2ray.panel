@@ -1,9 +1,8 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 import os
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, Response
 from flask_basicauth import BasicAuth
-
 from core.keys import Keyword as K
 from core.core_service import CoreService
 
@@ -218,12 +217,19 @@ def set_advance_config_api():
 
 @app.route('/reset_advance_config')
 def reset_advance_config_api():
-    config = request.json
     code = K.failed
     result = CoreService.reset_advance_config()
     if result:
         code = K.ok
     return jsonify({ K.result : code })
+
+@app.route('/make_policy')
+def make_policy_api():
+    content = request.args.get(K.content)
+    type = request.args.get(K.type)
+    outbound = request.args.get(K.outbound)
+    policy = CoreService.make_policy(content, type, outbound)
+    return Response(policy, mimetype='application/json')
 
 @app.route('/get_access_log')
 def get_access_log_api():

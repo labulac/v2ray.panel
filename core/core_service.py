@@ -6,9 +6,9 @@ Date:       2020年7月30日  31周星期四 10:55
 Desc:
 """
 import psutil
-import subprocess
 import os
 import os.path
+import jsonpickle
 
 from .app_config import AppConfig
 from .v2ray_controller import V2rayController, make_controller
@@ -112,5 +112,9 @@ class CoreService:
             cls.user_config.save()
         return result
 
-
-
+    @classmethod
+    def make_policy(cls, content:str, type:str, outbound:str) -> dict:
+        type = V2RayUserConfig.AdvanceConfig.Policy.Type[type]
+        outbound = V2RayUserConfig.AdvanceConfig.Policy.Outbound[outbound]
+        policy = V2RayUserConfig.AdvanceConfig.Policy(content, type, outbound)
+        return jsonpickle.encode(policy, indent=4)

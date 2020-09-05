@@ -1,5 +1,7 @@
 # encoding: utf-8
-from enum import Enum
+from enum import Enum, auto
+import typing
+from typing import List
 from .base_data_item import BaseDataItem
 from .node import Node
 
@@ -10,6 +12,20 @@ class V2RayUserConfig(BaseDataItem):
         ProxyGlobal = 2
 
     class AdvanceConfig(BaseDataItem):
+        class Policy:
+            class Type(Enum):
+                ip = auto()
+                domain = auto()
+            class Outbound(Enum):
+                direct = auto()
+                proxy = auto()
+                block = auto()
+
+            def __init__(self, content:str, type:Type, outbound:Outbound):
+                self.content = content
+                self.type = type.name
+                self.outbound = outbound.name
+
         class DnsConfig:
             def __init__(self):
                 self.default_local = '223.5.5.5'
@@ -31,6 +47,7 @@ class V2RayUserConfig(BaseDataItem):
 
         def __init__(self):
             self.dns: V2RayUserConfig.AdvanceConfig.DnsConfig = V2RayUserConfig.AdvanceConfig.DnsConfig()
+            self.policys:List[V2RayUserConfig.AdvanceConfig.Policy] = []
 
     def filename(self):
         return 'config/v2ray_user_config.json'

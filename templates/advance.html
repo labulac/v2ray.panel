@@ -3,19 +3,19 @@
     <p></p>
     <div class="mdui-row">
         <div class="mdui-table-fluid">
-            <table class="mdui-table">
+            <table id="advance_table" class="mdui-table">
                 <thead>
                 <tr>
-                    <th colspan="2">高级设置</th>
+                    <th colspan="5">高级设置</th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr>
-                    <td colspan="2" class="mdui-typo-caption-opacity">自定义 DNS 服务器</td>
+                    <td colspan="5" class="mdui-typo-caption-opacity">DNS 服务器</td>
                 </tr>
                 <tr>
                     <td>国内 DNS</td>
-                    <td>
+                    <td colspan="4">
                         <div class="mdui-row">
                             <div id="local_dns" class="mdui-col-sm-3"></div>
                             <div id="modify_local_dns" class="mdui-col-sm-2">
@@ -29,7 +29,7 @@
                 </tr>
                 <tr>
                     <td>国外 DNS</td>
-                    <td>
+                    <td colspan="4">
                         <div class="mdui-row">
                             <div id="remote_dns" class="mdui-col-sm-3"></div>
                             <div id="modify_remote_dns" class="mdui-col-sm-2">
@@ -41,12 +41,42 @@
                         </div>
                     </td>
                 </tr>
+                <tr class="mdui-color-grey-100"><td colspan="5"></td></tr>
                 <tr>
-                    <td colspan="2" class="mdui-typo-caption-opacity">提交</td>
+                    <td class="mdui-typo-caption-opacity">路由规则</td>
+                    <td colspan="4">
+                        <div class="mdui-row">
+                            <div id="add_rule" class="mdui-col-sm-2">
+                                <button class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-a100 mdui-ripple" onclick="create_rule()">添加</button>
+                            </div>
+                        </div>
+                    </td>
                 </tr>
-                <tr>
-                    <td></td>
+                <tr class="mdui-typo-caption-opacity">
+                    <td>序号</td>
+                    <td>类型</td>
+                    <td>匹配值</td>
+                    <td>策略</td>
+                    <td>操作</td>
+                </tr>
+                <tr id="rule_template" style="display: none">
+                    <td class="rule_index"></td>
+                    <td class="rule_type"></td>
+                    <td class="rule_content"></td>
+                    <td class="rule_policy"></td>
                     <td>
+                        <div class="mdui-row">
+                            <div class="mdui-chip delete_rule" title="删除节点">
+                                <span class="mdui-chip-icon mdui-color-red-500"><i class="mdui-icon material-icons">delete</i></span>
+                                <span class="mdui-chip-title">删除</span>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                <tr class="mdui-color-grey-100"><td colspan="5"></td></tr>
+                <tr>
+                    <td class="mdui-typo-caption-opacity">提交</td>
+                    <td colspan="4">
                         <div class="mdui-row">
                             <div id="discard" class="mdui-col-sm-2" style="display: none">
                                 <button class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-grey-300 mdui-ripple" onclick="discard_config()">放弃</button>
@@ -63,6 +93,81 @@
                 </tbody>
             </table>
         </div>
+    </div>
+</div>
+
+<!--create rule dialog-->
+<div id="rule_dialog" class="mdui-dialog">
+    <div class="mdui-dialog-title">创建路由规则</div>
+    <div class="mdui-dialog-content">
+        <div class="mdui-row">
+            <div class="mdui-table-fluid">
+                <table class="mdui-table">
+                    <thead>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>类型</td>
+                        <td>匹配值</td>
+                        <td>策略</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <select id="select_rule_type" class="mdui-select" mdui-select="{position: 'bottom'}" onchange="select_rule_type()">
+                                <option value="0" selected>IP</option>
+                                <option value="1">域名</option>
+                            </select>
+                        </td>
+                        <td>
+                            <div class="mdui-textfield">
+                                <input id="rule_content" class="mdui-textfield-input" type="text" value="">
+                            </div>
+                        </td>
+                        <td>
+                            <select id="select_policy_type" class="mdui-select" mdui-select="{position: 'bottom'}">
+                                <option value="0" selected>直连</option>
+                                <option value="1">代理</option>
+                                <option value="2">阻止</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="3">
+                            <div id="ip_rule_explain" style="display: none">
+                                <h3>匹配值说明</h3>
+                                <p>设置 IP 匹配，有以下几种形式：</p>
+                                <ul>
+                                    <li>IP: 形如<code>"127.0.0.1"</code>。</li>
+                                    <li><a href="https://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing" target="_blank">CIDR</a>: 形如<code>"10.0.0.0/8"</code>.</li>
+                                    <li>GeoIP: 形如<code>"geoip:cn"</code>，必须以<code>geoip:</code>（小写）开头，后面跟双字符国家代码，支持几乎所有可以上网的国家。<ul>
+                                        <li>特殊值：<code>"geoip:private"</code> (V2Ray 3.5+)，包含所有私有地址，如<code>127.0.0.1</code>。</li>
+                                    </ul>
+                                    </li>
+                                    <li>从文件中加载 IP: 形如<code>"ext:file:tag"</code>，必须以<code>ext:</code>（小写）开头，后面跟文件名和标签，文件存放在<a href="env.html#asset-location">资源目录</a>中，文件格式与<code>geoip.dat</code>相同标签必须在文件中存在。</li>
+                                </ul>
+                            </div>
+                            <div id="domain_rule_explain" style="display: none">
+                                <h3>匹配值说明</h3>
+                                <p>设置域名匹配，有以下几种形式：</p>
+                                <ul>
+                                    <li>纯字符串: 当此字符串匹配目标域名中任意部分，该规则生效。比如"sina.com"可以匹配"sina.com"、"sina.com.cn"和"www.sina.com"，但不匹配"sina.cn"。</li>
+                                    <li>正则表达式: 由<code>"regexp:"</code>开始，余下部分是一个正则表达式。当此正则表达式匹配目标域名时，该规则生效。例如"regexp:\\.goo.*\\.com$"匹配"www.google.com"、"fonts.googleapis.com"，但不匹配"google.com"。</li>
+                                    <li>子域名 (推荐): 由<code>"domain:"</code>开始，余下部分是一个域名。当此域名是目标域名或其子域名时，该规则生效。例如"domain:v2ray.com"匹配"www.v2ray.com"、"v2ray.com"，但不匹配"xv2ray.com"。</li>
+                                    <li>完整匹配: 由<code>"full:"</code>开始，余下部分是一个域名。当此域名完整匹配目标域名时，该规则生效。例如"full:v2ray.com"匹配"v2ray.com"但不匹配"www.v2ray.com"。</li>
+                                    <li>预定义域名列表：由<code>"geosite:"</code>开头，余下部分是一个名称，如<code>geosite:google</code>或者<code>geosite:cn</code>。名称及域名列表参考<a href="#dlc">预定义域名列表</a>。</li>
+                                    <li>从文件中加载域名: 形如<code>"ext:file:tag"</code>，必须以<code>ext:</code>（小写）开头，后面跟文件名和标签，文件存放在<a href="env.html#asset-location">资源目录</a>中，文件格式与<code>geosite.dat</code>相同，标签必须在文件中存在。</li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="mdui-dialog-actions">
+        <button class="mdui-btn mdui-ripple mdui-text-color-grey-500" onclick="close_rule_dialog()">取消</button>
+        <button class="mdui-btn mdui-ripple" onclick="add_rule()">添加</button>
     </div>
 </div>
 
@@ -117,6 +222,45 @@
             $("#remote_dns").html(default_dns_remote).addClass("mdui-text-color-black-disabled");
             $("#clear_remote_dns").hide();
         }
+
+        $("tr[id^='real_rule']").remove();
+        var base_policy_index = $("#rule_template").index();
+        var policys = g_config_local["policys"];
+        policys.forEach(function (policy) {
+            var type_dic = {
+                ip:'IP',
+                domain:'域名'
+            }
+            var type = type_dic[policy['type']];
+            var content = policy['content'];
+
+            var outbound_dic = {
+                direct: '直连',
+                proxy: '代理',
+                block: '阻止'
+            }
+            var outbound = outbound_dic[policy['outbound']];
+
+            var rule_row = $("#rule_template").clone();
+            var index = policys.indexOf(policy);
+            rule_row.attr('id', 'real_rule' + index);
+            rule_row.find('.rule_index').html((index + 1).toString());
+            rule_row.find('.rule_type').html(type);
+            rule_row.find('.rule_content').html(content);
+            rule_row.find('.rule_policy').html(outbound);
+
+            $("#advance_table > tbody > tr").eq(base_policy_index + index).after(rule_row);
+            rule_row.show();
+        });
+
+        $(".delete_rule").click(function () {
+            var row = $(this).closest("tr");
+            var rule_index = parseInt(row.find(".rule_index").text()) - 1;
+            var policys = g_config_local["policys"];
+
+            policys.splice(rule_index, 1);
+            refresh_local();
+        })
     }
     
     function modify_local_dns() {
@@ -198,6 +342,55 @@
                 refresh_remote();
             });
         });
+    }
+
+    var g_rule_dialog = null
+    function create_rule() {
+        g_rule_dialog = new mdui.Dialog("#rule_dialog", { modal:true, closeOnEsc:false});
+        select_rule_type();
+        g_rule_dialog.open();
+        mdui.mutation();
+    }
+
+    function add_rule() {
+        type_dic = {
+            0: 'ip',
+            1:'domain'};
+        outbound_dic = {
+            0: 'direct',
+            1: 'proxy',
+            2: 'block'
+        }
+        var type_index = $("#select_rule_type").prop('selectedIndex');
+        type = type_dic[type_index];
+        var outbound_index = $("#select_policy_type").prop('selectedIndex');
+        outbound = outbound_dic[outbound_index];
+        var content = $("#rule_content").val();
+
+        $.get("/make_policy", {"type":type, "content":content, "outbound":outbound}).done(function (policy) {
+            g_config_local["policys"].push(policy);
+            refresh_local();
+        }).always(function () {
+            close_rule_dialog();
+        })
+    }
+
+    function close_rule_dialog() {
+        g_rule_dialog.close();
+        g_rule_dialog.destroy();
+        g_rule_dialog = null;
+    }
+
+    function select_rule_type() {
+        var rule_type = $("#select_rule_type").prop('selectedIndex');
+        if (rule_type === 0) {
+            $("#ip_rule_explain").show();
+            $("#domain_rule_explain").hide();
+        } else if (rule_type === 1) {
+            $("#ip_rule_explain").hide();
+            $("#domain_rule_explain").show();
+        }
+        mdui.mutation();
     }
 
 </script>

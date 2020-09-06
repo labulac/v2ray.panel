@@ -225,10 +225,11 @@ def reset_advance_config_api():
 
 @app.route('/make_policy')
 def make_policy_api():
-    content = request.args.get(K.content)
+    contents:str = request.args.get(K.contents)
+    content_list = contents.split('\n')
     type = request.args.get(K.type)
     outbound = request.args.get(K.outbound)
-    policy = CoreService.make_policy(content, type, outbound)
+    policy = CoreService.make_policy(content_list, type, outbound)
     return Response(policy, mimetype='application/json')
 
 @app.route('/get_access_log')

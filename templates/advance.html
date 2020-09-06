@@ -43,12 +43,16 @@
                 </tr>
                 <tr class="mdui-color-grey-100"><td colspan="5"></td></tr>
                 <tr>
-                    <td class="mdui-typo-caption-opacity">路由规则</td>
-                    <td colspan="4">
-                        <div class="mdui-row">
+                    <td colspan="1" class="mdui-typo-caption-opacity">路由规则</td>
+                    <td colspan="3">
+                        <div class="mdui-row mdui-valign">
                             <div id="add_rule" class="mdui-col-sm-2">
                                 <button class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-a100 mdui-ripple" onclick="create_rule()">添加</button>
                             </div>
+                            <div id="clear_rule" class="mdui-col-sm-2">
+                                <button class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-grey-300 mdui-ripple" onclick="clear_rule()">清除</button>
+                            </div>
+                            <div class="mdui-typo-caption-opacity">ps: 仅「智能分流」或「全局代理」模式下生效</div>
                         </div>
                     </td>
                 </tr>
@@ -62,13 +66,15 @@
                 <tr id="rule_template" style="display: none">
                     <td class="rule_index"></td>
                     <td class="rule_type"></td>
-                    <td class="rule_content"></td>
+                    <td class="rule_contents"></td>
                     <td class="rule_policy"></td>
                     <td>
                         <div class="mdui-row">
-                            <div class="mdui-chip delete_rule" title="删除节点">
+                            <div class="mdui-chip edit_rule" title="编辑规则">
+                                <span class="mdui-chip-icon mdui-color-blue-500"><i class="mdui-icon material-icons">edit</i></span>
+                            </div>
+                            <div class="mdui-chip delete_rule" title="删除规则">
                                 <span class="mdui-chip-icon mdui-color-red-500"><i class="mdui-icon material-icons">delete</i></span>
-                                <span class="mdui-chip-title">删除</span>
                             </div>
                         </div>
                     </td>
@@ -108,23 +114,24 @@
                     <tbody>
                     <tr>
                         <td>类型</td>
-                        <td>匹配值</td>
+                        <td>匹配值（可添加多行，一行一个，不带引号）</td>
                         <td>策略</td>
                     </tr>
                     <tr>
                         <td>
-                            <select id="select_rule_type" class="mdui-select" mdui-select="{position: 'bottom'}" onchange="select_rule_type()">
+                            <select id="select_rule_type" onchange="select_rule_type()">
                                 <option value="0" selected>IP</option>
                                 <option value="1">域名</option>
                             </select>
                         </td>
                         <td>
                             <div class="mdui-textfield">
-                                <input id="rule_content" class="mdui-textfield-input" type="text" value="">
+                                <textarea id="rule_contents" rows="3" class="mdui-textfield-input" type="text">
+                                </textarea>
                             </div>
                         </td>
                         <td>
-                            <select id="select_policy_type" class="mdui-select" mdui-select="{position: 'bottom'}">
+                            <select id="select_policy_type">
                                 <option value="0" selected>🌐 直连</option>
                                 <option value="1">✈️ 代理</option>
                                 <option value="2">✂️ 阻止</option>
@@ -167,7 +174,8 @@
     </div>
     <div class="mdui-dialog-actions">
         <button class="mdui-btn mdui-ripple mdui-text-color-grey-500" onclick="close_rule_dialog()">取消</button>
-        <button class="mdui-btn mdui-ripple" onclick="add_rule()">添加</button>
+        <button id="create_rule" class="mdui-btn mdui-ripple" style="display: none" onclick="add_rule()">添加</button>
+        <button id="update_rule" class="mdui-btn mdui-ripple" style="display: none" onclick="update_rule()">更新</button>
     </div>
 </div>
 
@@ -230,15 +238,20 @@
             var type_dic = {
                 ip:'IP',
                 domain:'域名'
-            }
+            };
             var type = type_dic[policy['type']];
-            var content = policy['content'];
+            var contents = policy['contents'];
+            var contents_html = ''
+            contents.forEach(function (line) {
+                line_html = line + '<br>';
+                contents_html += line_html;
+            });
 
             var outbound_dic = {
                 direct: '🌐 直连',
                 proxy: '✈️ 代理',
                 block: '✂️ 阻止'
-            }
+            };
             var outbound = outbound_dic[policy['outbound']];
 
             var rule_row = $("#rule_template").clone();
@@ -246,7 +259,7 @@
             rule_row.attr('id', 'real_rule' + index);
             rule_row.find('.rule_index').html((index + 1).toString());
             rule_row.find('.rule_type').html(type);
-            rule_row.find('.rule_content').html(content);
+            rule_row.find('.rule_contents').html(contents_html);
             rule_row.find('.rule_policy').html(outbound);
 
             $("#advance_table > tbody > tr").eq(base_policy_index + index).after(rule_row);
@@ -260,6 +273,13 @@
 
             policys.splice(rule_index, 1);
             refresh_local();
+        })
+
+        $(".edit_rule").click(function () {
+            var row = $(this).closest("tr");
+            var rule_index = parseInt(row.find(".rule_index").text()) - 1;
+            var rule = g_config_local["policys"][rule_index];
+            edit_rule(rule_index, rule);
         })
     }
     
@@ -345,34 +365,79 @@
     }
 
     var g_rule_dialog = null
+    var rule_types = [
+        'ip',
+        'domain'
+    ];
+    var outbound_typs = [
+        'direct',
+        'proxy',
+        'block'
+    ];
+
     function create_rule() {
         g_rule_dialog = new mdui.Dialog("#rule_dialog", { modal:true, closeOnEsc:false});
+        $("#create_rule").show();
+        $("#update_rule").hide();
         select_rule_type();
+
         g_rule_dialog.open();
         mdui.mutation();
     }
 
-    function add_rule() {
-        type_dic = {
-            0: 'ip',
-            1:'domain'};
-        outbound_dic = {
-            0: 'direct',
-            1: 'proxy',
-            2: 'block'
-        }
-        var type_index = $("#select_rule_type").prop('selectedIndex');
-        type = type_dic[type_index];
-        var outbound_index = $("#select_policy_type").prop('selectedIndex');
-        outbound = outbound_dic[outbound_index];
-        var content = $("#rule_content").val();
+    function clear_rule() {
+        g_config_local["policys"] = [];
+        refresh_local();
+    }
 
-        $.get("/make_policy", {"type":type, "content":content, "outbound":outbound}).done(function (policy) {
+    function edit_rule(rule_index, rule) {
+        g_rule_dialog = new mdui.Dialog("#rule_dialog", { modal:true, closeOnEsc:false});
+        $("#create_rule").hide();
+        $("#update_rule").show();
+        $("#select_rule_type").val(rule_types.indexOf(rule.type));
+        select_rule_type();
+
+        var contents = '';
+        rule.contents.forEach(function (content) {
+            contents += content + '\n';
+        });
+        contents = contents.slice(0, -1);
+        $("#rule_contents").val(contents);
+        $("#select_policy_type").val(outbound_typs.indexOf(rule.outbound));
+
+        g_rule_dialog.rule_index = rule_index;
+        g_rule_dialog.open();
+        mdui.mutation();
+    }
+
+    function update_rule() {
+        var type_index = $("#select_rule_type").prop('selectedIndex');
+        type = rule_types[type_index];
+        var outbound_index = $("#select_policy_type").prop('selectedIndex');
+        outbound = outbound_typs[outbound_index];
+        var contents = $("#rule_contents").val();
+
+        $.get("/make_policy", {"type":type, "contents":contents, "outbound":outbound}).done(function (policy) {
+            g_config_local["policys"][g_rule_dialog.rule_index] = policy;
+            refresh_local();
+        }).always(function () {
+            close_rule_dialog();
+        });
+    }
+
+    function add_rule() {
+        var type_index = $("#select_rule_type").prop('selectedIndex');
+        type = rule_types[type_index];
+        var outbound_index = $("#select_policy_type").prop('selectedIndex');
+        outbound = outbound_typs[outbound_index];
+        var contents = $("#rule_contents").val();
+
+        $.get("/make_policy", {"type":type, "contents":contents, "outbound":outbound}).done(function (policy) {
             g_config_local["policys"].push(policy);
             refresh_local();
         }).always(function () {
             close_rule_dialog();
-        })
+        });
     }
 
     function close_rule_dialog() {
@@ -382,13 +447,17 @@
     }
 
     function select_rule_type() {
+        var rule_contents = $('#rule_contents');
+        rule_contents.val('');
         var rule_type = $("#select_rule_type").prop('selectedIndex');
         if (rule_type === 0) {
             $("#ip_rule_explain").show();
             $("#domain_rule_explain").hide();
+            rule_contents.attr('placeholder', 'geoip:us\n39.156.69.79');
         } else if (rule_type === 1) {
             $("#ip_rule_explain").hide();
             $("#domain_rule_explain").show();
+            rule_contents.attr('placeholder', 'geosite:kr\ngoogle.com');
         }
         mdui.mutation();
     }

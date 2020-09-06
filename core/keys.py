@@ -27,6 +27,6 @@ class Keyword:
     remote = 'remote'
     manual = 'manual'
     url = 'url'
-    content = 'content'
+    contents = 'contents'
     type = 'type'
     outbound = 'outbound'

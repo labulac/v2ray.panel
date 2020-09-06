@@ -311,7 +311,8 @@ class V2RayConfig(DontPickleNone):
                 policy:V2RayUserConfig.AdvanceConfig.Policy
                 if (policy.type == V2RayUserConfig.AdvanceConfig.Policy.Type.domain.name and
                         policy.outbound == V2RayUserConfig.AdvanceConfig.Policy.Outbound.direct.name):
-                    local_server.add_domain(policy.content)
+                    for domain in policy.contents:
+                        local_server.add_domain(domain)
 
             config.dns.add_server(local_server)
 
@@ -336,18 +337,18 @@ class V2RayConfig(DontPickleNone):
             for policy in user_config.advance_config.policys:
                 if policy.type == V2RayUserConfig.AdvanceConfig.Policy.Type.ip.name:
                     if policy.outbound == V2RayUserConfig.AdvanceConfig.Policy.Outbound.direct.name:
-                        direct_ips.append(policy.content)
+                        direct_ips.extend(policy.contents)
                     elif policy.outbound == V2RayUserConfig.AdvanceConfig.Policy.Outbound.proxy.name:
-                        proxy_ips.append(policy.content)
+                        proxy_ips.extend(policy.contents)
                     elif policy.outbound == V2RayUserConfig.AdvanceConfig.Policy.Outbound.block.name:
-                        block_ips.append(policy.content)
+                        block_ips.extend(policy.contents)
                 elif policy.type == V2RayUserConfig.AdvanceConfig.Policy.Type.domain.name:
                     if policy.outbound == V2RayUserConfig.AdvanceConfig.Policy.Outbound.direct.name:
-                        direct_domains.append(policy.content)
+                        direct_domains.extend(policy.contents)
                     elif policy.outbound == V2RayUserConfig.AdvanceConfig.Policy.Outbound.proxy.name:
-                        proxy_domains.append(policy.content)
+                        proxy_domains.extend(policy.contents)
                     elif policy.outbound == V2RayUserConfig.AdvanceConfig.Policy.Outbound.block.name:
-                        block_domains.append(policy.content)
+                        block_domains.extend(policy.contents)
             if len(direct_ips):
                 rule = cls._make_user_ip_rule(direct_ips, V2RayUserConfig.AdvanceConfig.Policy.Outbound.direct)
                 config.routing.rules.append(rule)
@@ -556,7 +557,7 @@ class V2RayConfig(DontPickleNone):
     def _make_user_ip_rule(cls, ips:List[str], outbound:V2RayUserConfig.AdvanceConfig.Policy.Outbound):
         rule = Routing.Rule()
         for ip in ips:
-            rule.add_domain(ip)
+            rule.add_ip(ip)
         rule.outboundTag = cls._tag_from_outband(outbound)
         return rule
 

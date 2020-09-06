@@ -9,6 +9,7 @@ import psutil
 import os
 import os.path
 import jsonpickle
+from typing import List
 
 from .app_config import AppConfig
 from .v2ray_controller import V2rayController, make_controller
@@ -113,8 +114,8 @@ class CoreService:
         return result
 
     @classmethod
-    def make_policy(cls, content:str, type:str, outbound:str) -> dict:
+    def make_policy(cls, contents:List[str], type:str, outbound:str) -> dict:
         type = V2RayUserConfig.AdvanceConfig.Policy.Type[type]
         outbound = V2RayUserConfig.AdvanceConfig.Policy.Outbound[outbound]
-        policy = V2RayUserConfig.AdvanceConfig.Policy(content, type, outbound)
+        policy = V2RayUserConfig.AdvanceConfig.Policy(contents, type, outbound)
         return jsonpickle.encode(policy, indent=4)

@@ -47,7 +47,7 @@
                     <td colspan="3">
                         <div class="mdui-row mdui-valign">
                             <div id="add_rule" class="mdui-col-sm-2">
-                                <button class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-a100 mdui-ripple" onclick="create_rule()">添加</button>
+                                <button class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-a100 mdui-ripple" onclick="create_rule()">创建</button>
                             </div>
                             <div id="clear_rule" class="mdui-col-sm-2">
                                 <button class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-grey-300 mdui-ripple" onclick="clear_rule()">清除</button>
@@ -104,7 +104,7 @@
 
 <!--create rule dialog-->
 <div id="rule_dialog" class="mdui-dialog">
-    <div class="mdui-dialog-title">创建路由规则</div>
+    <div id="rule_dialog_title" class="mdui-dialog-title">创建路由规则</div>
     <div class="mdui-dialog-content">
         <div class="mdui-row">
             <div class="mdui-table-fluid">
@@ -377,6 +377,7 @@
 
     function create_rule() {
         g_rule_dialog = new mdui.Dialog("#rule_dialog", { modal:true, closeOnEsc:false});
+        $("#rule_dialog_title").text('创建路由规则');
         $("#create_rule").show();
         $("#update_rule").hide();
         select_rule_type();
@@ -392,6 +393,7 @@
 
     function edit_rule(rule_index, rule) {
         g_rule_dialog = new mdui.Dialog("#rule_dialog", { modal:true, closeOnEsc:false});
+        $("#rule_dialog_title").text('编辑路由规则');
         $("#create_rule").hide();
         $("#update_rule").show();
         $("#select_rule_type").val(rule_types.indexOf(rule.type));

@@ -1,39 +1,26 @@
 <div class="mdui-container">
     <p></p>
     <div class="mdui-row">
-        <h5 class="mdui-table-fluid">
-            <table class="mdui-table">
-                <thead>
-                <tr>
-                    <th>
-                        <div class="mdui-row">
-                            运行日志 (实时刷新）
-                            <div class="mdui-progress">
-                                <div class="mdui-progress-indeterminate"></div>
-                            </div>
-                        </div>
-                    </th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                    <td>
-                        <div class="mdui-row">
-                            access.log
-                            <pre><code id="log-access-content" class="language-css"></code></pre>
-                        </div>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <div class="mdui-row">
-                            error.log
-                            <pre><code id="log-error-content" class="language-css"></code></pre>
-                        </div>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
+        <div class="mdui-table-fluid">
+            <div class="mdui-container mdui-typo">
+                <div>
+                    <h5>运行日志</h5>
+                    <div class="mdui-progress">
+                        <div class="mdui-progress-indeterminate"></div>
+                    </div>
+                </div>
+                <p></p>
+                <div>
+                    <strong>访问日志</strong>
+                    <pre><code id="log-access-content" class="language-css"></code></pre>
+                </div>
+                <p></p>
+                <div>
+                    <strong>错误日志</strong>
+                    <pre><code id="log-error-content" class="language-css"></code></pre>
+                </div>
+                <p><br></p>
+            </div>
         </div>
     </div>
 </div>

@@ -5,7 +5,6 @@ Author:     twotrees.us@gmail.com
 Date:       2020年7月30日  31周星期四 10:53
 Desc:
 """
-import textwrap
 import subprocess
 import requests
 import sys
@@ -68,15 +67,12 @@ class V2rayController:
             return self.wrap_last_lines(lines)
 
     def wrap_last_lines(self, lines: list) -> str:
-        count = min(10, len(lines))
+        count = min(20, len(lines))
         lines = lines[-count:]
         string = ""
 
-        wrapper = textwrap.TextWrapper(width=100)
         for line in lines:
-            wrap_list = wrapper.wrap(line)
-            for wrap in wrap_list:
-                string += wrap + '<br>'
+            string += line + '<br>'
         return string
 
     def apply_node(self, user_config:V2RayUserConfig, restart: bool) -> bool:

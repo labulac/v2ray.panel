@@ -4,14 +4,11 @@
     <div class="mdui-row">
         <div class="mdui-table-fluid">
             <table id="advance_table" class="mdui-table">
-                <thead>
-                <tr>
-                    <th colspan="5">高级设置</th>
-                </tr>
-                </thead>
                 <tbody>
                 <tr>
-                    <td colspan="5" class="mdui-typo-caption-opacity">DNS 服务器</td>
+                    <td colspan="5" class="mdui-typo">
+                        <h5>DNS 服务器</h5>
+                    </td>
                 </tr>
                 <tr>
                     <td>国内 DNS</td>
@@ -43,8 +40,16 @@
                 </tr>
                 <tr class="mdui-color-grey-100"><td colspan="5"></td></tr>
                 <tr>
-                    <td colspan="1" class="mdui-typo-caption-opacity">路由规则</td>
-                    <td colspan="3">
+                    <td class="mdui-typo">
+                        <h5>路由规则</h5>
+                    </td>
+                    <td colspan="4">
+                        <div class="mdui-typo mdui-typo-caption-opacity"><h6>PS: 仅「智能分流」或「全局代理」模式下生效</h6></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>操作</td>
+                    <td colspan="4">
                         <div class="mdui-row mdui-valign">
                             <div id="add_rule" class="mdui-col-sm-2">
                                 <button class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-a100 mdui-ripple" onclick="create_rule()">创建</button>
@@ -52,7 +57,6 @@
                             <div id="clear_rule" class="mdui-col-sm-2">
                                 <button class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-grey-300 mdui-ripple" onclick="clear_rule()">清除</button>
                             </div>
-                            <div class="mdui-typo-caption-opacity">ps: 仅「智能分流」或「全局代理」模式下生效</div>
                         </div>
                     </td>
                 </tr>

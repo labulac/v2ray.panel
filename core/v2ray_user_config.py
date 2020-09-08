@@ -48,6 +48,7 @@ class V2RayUserConfig(BaseDataItem):
         def __init__(self):
             self.dns: V2RayUserConfig.AdvanceConfig.DnsConfig = V2RayUserConfig.AdvanceConfig.DnsConfig()
             self.policys:List[V2RayUserConfig.AdvanceConfig.Policy] = []
+            self.proxy_preferred = True
 
     def filename(self):
         return 'config/v2ray_user_config.json'

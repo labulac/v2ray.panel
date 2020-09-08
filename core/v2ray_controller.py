@@ -75,17 +75,15 @@ class V2rayController:
             string += line + '<br>'
         return string
 
-    def apply_node(self, user_config:V2RayUserConfig, restart: bool) -> bool:
+    def apply_node(self, user_config:V2RayUserConfig) -> bool:
         config = V2RayConfig.gen_config(user_config)
-        return self.apply_config(config, restart)
+        return self.apply_config(config)
 
-    def apply_config(self, config: str, restart: bool) -> bool:
+    def apply_config(self, config: str) -> bool:
         with open('/etc/v2ray/config.json', 'w+') as f:
             f.write(config)
 
-        result = True
-        if restart:
-            result = self.restart()
+        result = self.restart()
         return  result
 
     def enable_iptables(self):
@@ -117,7 +115,7 @@ class MokeV2rayController(V2rayController):
     def error_log(self) -> str:
         return ''
 
-    def apply_config(self, config: str, restart: bool) -> bool:
+    def apply_config(self, config: str) -> bool:
         with open('config/moke_config.json', 'w+') as f:
             f.write(config)
         return True

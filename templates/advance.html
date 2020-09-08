@@ -79,7 +79,7 @@
                     </td>
                     <td colspan="2">
                         <div class="mdui-typo-caption-opacity">
-                            规则顺序会影响到匹配效果，会优先匹配前面的规则，当匹配到第一条规则，则会跳过后面的规则
+                            规则顺序会影响到匹配效果，当从前向后匹配到第一条规则时，则跳过后面的规则
                         </div>
                     </td>
                 </tr>
@@ -114,6 +114,26 @@
                 </tr>
                 <tr class="mdui-color-grey-100"><td colspan="5"></td></tr>
                 <tr>
+                    <td colspan="5" class="mdui-typo">
+                        <h5>其他设置</h5>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Mux 多路复用</td>
+                    <td colspan="2">
+                        <label class="mdui-switch">
+                            <input id="enable_mux" type="checkbox" checked onchange="enable_mux_change()"/>
+                            <i class="mdui-switch-icon"></i>
+                        </label>
+                    </td>
+                    <td colspan="2">
+                        <div class="mdui-typo-caption-opacity">
+                            <p>Mux 功能是在一条 TCP 连接上分发多个 TCP 连接的数据。实现细节详见<a href="../developer/protocols/muxcool.html">Mux.Cool</a></p>
+                        </div>
+                    </td>
+                </tr>
+                <tr class="mdui-color-grey-100"><td colspan="5"></td></tr>
+                <tr class="mdui-color-light-blue-50">
                     <td class="mdui-typo-caption-opacity">提交</td>
                     <td colspan="4">
                         <div class="mdui-row">
@@ -133,6 +153,7 @@
             </table>
         </div>
     </div>
+    <p></p>
 </div>
 
 <!--create rule dialog-->
@@ -268,6 +289,9 @@
 
         var proxy_preferred = g_config_local['proxy_preferred'];
         $("#proxy_preferred").prop('checked', proxy_preferred);
+
+        var enable_mux = g_config_local['enable_mux'];
+        $("#enable_mux").prop('checked', enable_mux);
 
         $("tr[id^='real_rule']").remove();
         var base_policy_index = $("#rule_template").index();
@@ -432,6 +456,11 @@
 
     function proxy_preferred_change() {
         g_config_local['proxy_preferred'] = $("#proxy_preferred").prop('checked');
+        refresh_local();
+    }
+
+    function enable_mux_change() {
+        g_config_local['enable_mux'] = $("#enable_mux").prop('checked');
         refresh_local();
     }
 

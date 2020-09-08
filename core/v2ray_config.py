@@ -288,7 +288,7 @@ class V2RayConfig(DontPickleNone):
         if user_config.proxy_mode == V2RayUserConfig.ProxyMode.Direct.value:
             config.add_outbound(direct)
         else:
-            proxy = cls._make_outbound_proxy(user_config.node)
+            proxy = cls._make_outbound_proxy(user_config.node, user_config.advance_config.enable_mux)
             block = cls._make_outbound_block()
             dnsout = cls._make_outbound_dnsout()
             if user_config.advance_config.proxy_preferred:
@@ -387,7 +387,7 @@ class V2RayConfig(DontPickleNone):
         return direct
 
     @classmethod
-    def _make_outbound_proxy(cls, node:Node) -> Outbound:
+    def _make_outbound_proxy(cls, node:Node, enable_mux:bool) -> Outbound:
         proxy = Outbound()
         proxy.tag = Tags.proxy.value
         proxy.protocol = ProtocolVMess.type
@@ -419,6 +419,7 @@ class V2RayConfig(DontPickleNone):
             stream_settings.tlsSettings.serverName = node.host
 
         proxy.mux = Outbound.Mux()
+        proxy.mux.enabled = enable_mux
 
         return proxy
 

@@ -73,7 +73,7 @@ class CoreService:
         result = False
         node = cls.node_manager.find_node(url, index)
         cls.user_config.node = node
-        if cls.v2ray.apply_node(cls.user_config, True):
+        if cls.v2ray.apply_node(cls.user_config):
             cls.user_config.save()
 
             if not cls.app_config.inited:

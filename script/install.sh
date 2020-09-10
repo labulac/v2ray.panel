@@ -29,33 +29,11 @@ mkdir /var/log/v2ray
 exit 0
 EOF
 
-#install V2ray
-cat>>/etc/systemd/system/v2ray.service<<EOF
-[Unit]
-Description=V2Ray Service
-After=network.target nss-lookup.target
-
-[Service]
-User=root
-CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
-AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
-NoNewPrivileges=true
-Environment=V2RAY_LOCATION_ASSET=/usr/local/share/v2ray/
-ExecStart=/usr/local/bin/v2ray -config /etc/v2ray/config.json
-LimitNPROC=500
-LimitNOFILE=1000000
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-systemctl daemon-reload
-
 bash update_v2ray.sh
-
 mkdir -p /etc/v2ray/
 touch /etc/v2ray/config.json
 mkdir -p /var/log/v2ray/
+
 cat>>/etc/supervisor/supervisord.conf<<EOF
 Description=V2Ray Service
 After=network.target nss-lookup.target

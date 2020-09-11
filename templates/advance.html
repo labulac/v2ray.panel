@@ -6,13 +6,13 @@
             <table id="advance_table" class="mdui-table">
                 <tbody>
                 <tr>
-                    <td colspan="5" class="mdui-typo">
+                    <td colspan="6" class="mdui-typo">
                         <h5>DNS 服务器</h5>
                     </td>
                 </tr>
                 <tr>
                     <td>国内 DNS</td>
-                    <td colspan="4">
+                    <td colspan="6">
                         <div class="mdui-row mdui-valign">
                             <div id="local_dns" class="mdui-col-sm-3"></div>
                             <div id="modify_local_dns" class="mdui-col-sm-2">
@@ -26,7 +26,7 @@
                 </tr>
                 <tr>
                     <td>国外 DNS</td>
-                    <td colspan="4">
+                    <td colspan="5">
                         <div class="mdui-row mdui-valign">
                             <div id="remote_dns" class="mdui-col-sm-3"></div>
                             <div id="modify_remote_dns" class="mdui-col-sm-2">
@@ -38,12 +38,12 @@
                         </div>
                     </td>
                 </tr>
-                <tr class="mdui-color-grey-100"><td colspan="5"></td></tr>
+                <tr class="mdui-color-grey-100"><td colspan="6"></td></tr>
                 <tr>
                     <td class="mdui-typo">
                         <h5>路由规则</h5>
                     </td>
-                    <td colspan="4">
+                    <td colspan="5">
                         <div class="mdui-typo mdui-typo-caption-opacity"><h6>仅「智能分流」或「全局代理」模式下生效</h6></div>
                     </td>
                 </tr>
@@ -55,7 +55,7 @@
                             <i class="mdui-switch-icon"></i>
                         </label>
                     </td>
-                    <td colspan="2">
+                    <td colspan="3">
                         <div class="mdui-typo-caption-opacity">
                             设置当未命中任何规则时，默认直连还是代理，关闭即是「直连优先」，例如:
                             <ul>
@@ -77,7 +77,7 @@
                             <button class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-grey-300 mdui-ripple" onclick="clear_rule()">清除</button>
                         </div>
                     </td>
-                    <td colspan="2">
+                    <td colspan="3">
                         <div class="mdui-typo-caption-opacity">
                             规则顺序会影响到匹配效果，当从前向后匹配到第一条规则时，则应用该规则策略并跳过后面的规则
                         </div>
@@ -89,6 +89,7 @@
                     <td>匹配值</td>
                     <td>策略</td>
                     <td>操作</td>
+                    <td>启用</td>
                 </tr>
                 <tr id="rule_template" style="display: none">
                     <td class="rule_index"></td>
@@ -96,7 +97,7 @@
                     <td class="rule_contents"></td>
                     <td class="rule_policy"></td>
                     <td>
-                        <div class="mdui-row">
+                        <div class="mdui-row-sm5">
                             <div class="mdui-chip edit_rule" title="编辑规则">
                                 <span class="mdui-chip-icon mdui-color-blue-500"><i class="mdui-icon material-icons">edit</i></span>
                             </div>
@@ -111,10 +112,16 @@
                             </div>
                         </div>
                     </td>
+                    <td>
+                        <label class="mdui-checkbox">
+                            <input class="rule_enable" type="checkbox" checked/>
+                            <i class="mdui-checkbox-icon"></i>
+                        </label>
+                    </td>
                 </tr>
-                <tr class="mdui-color-grey-100"><td colspan="5"></td></tr>
+                <tr class="mdui-color-grey-100"><td colspan="6"></td></tr>
                 <tr>
-                    <td colspan="5" class="mdui-typo">
+                    <td colspan="6" class="mdui-typo">
                         <h5>其他设置</h5>
                     </td>
                 </tr>
@@ -126,16 +133,16 @@
                             <i class="mdui-switch-icon"></i>
                         </label>
                     </td>
-                    <td colspan="2">
+                    <td colspan="4">
                         <div class="mdui-typo-caption-opacity">
                             <p>Mux 功能是在一条 TCP 连接上分发多个 TCP 连接的数据。实现细节详见<a href="https://www.v2ray.com/developer/protocols/muxcool.html">Mux.Cool</a></p>
                         </div>
                     </td>
                 </tr>
-                <tr class="mdui-color-grey-100"><td colspan="5"></td></tr>
+                <tr class="mdui-color-grey-100"><td colspan="6"></td></tr>
                 <tr class="mdui-color-light-blue-50">
                     <td class="mdui-typo-caption-opacity">提交</td>
-                    <td colspan="4">
+                    <td colspan="5">
                         <div class="mdui-row">
                             <div id="discard" class="mdui-col-sm-2" style="display: none">
                                 <button class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-grey-300 mdui-ripple" onclick="discard_config()">放弃</button>
@@ -323,6 +330,7 @@
             rule_row.find('.rule_type').html(type);
             rule_row.find('.rule_contents').html(contents_html);
             rule_row.find('.rule_policy').html(outbound);
+            rule_row.find('.rule_enable').prop('checked', policy['enable']);
 
             $("#advance_table > tbody > tr").eq(base_policy_index + index).after(rule_row);
             rule_row.show();
@@ -371,6 +379,14 @@
                 refresh_local();
             }
         });
+
+        $(".rule_enable").click(function () {
+            var row = $(this).closest("tr");
+            var rule_index = parseInt(row.find(".rule_index").text()) - 1;
+            var rule = g_config_local["policys"][rule_index];
+            rule['enable'] = $(this).prop('checked');
+            refresh_local();
+        })
     }
     
     function modify_local_dns() {

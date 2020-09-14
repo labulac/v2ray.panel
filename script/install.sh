@@ -11,7 +11,7 @@ apt-get install wget curl socat git python3 python3-setuptools python3-dev pytho
 pip3 install -r requirements.txt
 
 #enable rc.local
-cat>>/etc/rc.local<<EOF
+cat>/etc/rc.local<<-EOF
 #!/bin/sh -e
 #
 # rc.local
@@ -29,31 +29,10 @@ mkdir /var/log/v2ray
 exit 0
 EOF
 
-bash update_v2ray.sh
 mkdir -p /etc/v2ray/
 touch /etc/v2ray/config.json
 mkdir -p /var/log/v2ray/
-
-cat>>/etc/supervisor/supervisord.conf<<EOF
-Description=V2Ray Service
-After=network.target nss-lookup.target
-
-[Service]
-User=root
-CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
-AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
-NoNewPrivileges=true
-Environment=V2RAY_LOCATION_ASSET=/usr/local/share/v2ray/
-ExecStart=/usr/local/bin/v2ray -config /etc/v2ray/config.json
-LimitNPROC=500
-LimitNOFILE=1000000
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-#start v2ray services
-systemctl start v2ray.service
+bash update_v2ray.sh
 
 #generate Default Configurations
 chmod +x /usr/local/V2ray.Fun/script/start.sh
@@ -67,7 +46,7 @@ cat>>/etc/supervisor/supervisord.conf<<EOF
 files = /etc/supervisor/conf.d/*.ini
 EOF
 touch /etc/supervisor/conf.d/v2ray.fun.ini
-cat>>/etc/supervisor/conf.d/v2ray.fun.ini<<EOF
+cat>/etc/supervisor/conf.d/v2ray.fun.ini<<-EOF
 [program:v2ray.fun]
 command=/usr/local/V2ray.Fun/script/start.sh run
 stdout_logfile=/var/log/v2ray.fun
@@ -84,7 +63,7 @@ supervisord -c /etc/supervisor/supervisord.conf
 
 # ip table
 echo net.ipv4.ip_forward=1 >> /etc/sysctl.conf && sysctl -p
-cat>>/etc/systemd/system/v2ray_iptable.service<<EOF
+cat>/etc/systemd/system/v2ray_iptable.service<<-EOF
 [Unit]
 Description=Tproxy rule
 After=network-online.target

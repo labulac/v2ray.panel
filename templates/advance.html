@@ -113,9 +113,9 @@
                         </div>
                     </td>
                     <td>
-                        <label class="mdui-checkbox">
+                        <label class="mdui-switch">
                             <input class="rule_enable" type="checkbox" checked/>
-                            <i class="mdui-checkbox-icon"></i>
+                            <i class="mdui-switch-icon"></i>
                         </label>
                     </td>
                 </tr>
@@ -270,6 +270,7 @@
             $('#apply').hide();
         }
 
+        // dns
         dns_config = g_config_local["dns"];
         default_dns_local = dns_config["default_local"];
         default_dns_remote = dns_config["default_remote"];
@@ -294,11 +295,10 @@
             $("#clear_remote_dns").hide();
         }
 
+        // rule
+
         var proxy_preferred = g_config_local['proxy_preferred'];
         $("#proxy_preferred").prop('checked', proxy_preferred);
-
-        var enable_mux = g_config_local['enable_mux'];
-        $("#enable_mux").prop('checked', enable_mux);
 
         $("tr[id^='real_rule']").remove();
         var base_policy_index = $("#rule_template").index();
@@ -380,13 +380,19 @@
             }
         });
 
-        $(".rule_enable").click(function () {
+        $(".rule_enable").change(function () {
             var row = $(this).closest("tr");
             var rule_index = parseInt(row.find(".rule_index").text()) - 1;
             var rule = g_config_local["policys"][rule_index];
             rule['enable'] = $(this).prop('checked');
-            refresh_local();
-        })
+            setTimeout(function () {
+                refresh_local();
+            }, 300);
+        });
+
+        // mux
+        var enable_mux = g_config_local['enable_mux'];
+        $("#enable_mux").prop('checked', enable_mux);
     }
     
     function modify_local_dns() {

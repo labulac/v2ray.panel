@@ -312,7 +312,8 @@ class V2RayConfig(DontPickleNone):
             # user direct domain use local dns
             for policy in user_config.advance_config.policys:
                 policy:V2RayUserConfig.AdvanceConfig.Policy
-                if (policy.type == V2RayUserConfig.AdvanceConfig.Policy.Type.domain.name and
+                if (policy.enable and
+                        policy.type == V2RayUserConfig.AdvanceConfig.Policy.Type.domain.name and
                         policy.outbound == V2RayUserConfig.AdvanceConfig.Policy.Outbound.direct.name):
                     for domain in policy.contents:
                         local_server.add_domain(domain)
@@ -332,12 +333,13 @@ class V2RayConfig(DontPickleNone):
 
             # user rules
             for policy in user_config.advance_config.policys:
-                rule = None
-                if policy.type == V2RayUserConfig.AdvanceConfig.Policy.Type.ip.name:
-                    rule = cls._make_user_ip_rule(policy.contents, V2RayUserConfig.AdvanceConfig.Policy.Outbound[policy.outbound])
-                elif policy.type == V2RayUserConfig.AdvanceConfig.Policy.Type.domain.name:
-                    rule = cls._make_user_domain_rule(policy.contents, V2RayUserConfig.AdvanceConfig.Policy.Outbound[policy.outbound])
-                config.routing.rules.append(rule)
+                if policy.enable:
+                    rule = None
+                    if policy.type == V2RayUserConfig.AdvanceConfig.Policy.Type.ip.name:
+                        rule = cls._make_user_ip_rule(policy.contents, V2RayUserConfig.AdvanceConfig.Policy.Outbound[policy.outbound])
+                    elif policy.type == V2RayUserConfig.AdvanceConfig.Policy.Type.domain.name:
+                        rule = cls._make_user_domain_rule(policy.contents, V2RayUserConfig.AdvanceConfig.Policy.Outbound[policy.outbound])
+                    config.routing.rules.append(rule)
 
             if user_config.proxy_mode == V2RayUserConfig.ProxyMode.ProxyAuto.value:
                 ip_cn = cls._make_ip_cn_rule()

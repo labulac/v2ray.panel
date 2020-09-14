@@ -25,6 +25,7 @@ class V2RayUserConfig(BaseDataItem):
                 self.contents:List[str] = contents
                 self.type:str = type.name
                 self.outbound:str = outbound.name
+                self.enable = True
 
         class DnsConfig:
             def __init__(self):

@@ -29,13 +29,12 @@ mkdir /var/log/v2ray
 exit 0
 EOF
 
+# install v2ray
 mkdir -p /etc/v2ray/
 touch /etc/v2ray/config.json
+chmod 644 /etc/v2ray/config.json
 mkdir -p /var/log/v2ray/
 bash update_v2ray.sh
-
-#generate Default Configurations
-chmod +x /usr/local/V2ray.Fun/script/start.sh
 
 #configure Supervisor
 mkdir /etc/supervisor
@@ -58,8 +57,8 @@ stopasgroup=true
 killasgroup=true
 EOF
 
-chmod 644 /etc/v2ray/config.json
 supervisord -c /etc/supervisor/supervisord.conf
+supervisorctl restart v2ray.fun
 
 # ip table
 echo net.ipv4.ip_forward=1 >> /etc/sysctl.conf && sysctl -p
@@ -78,6 +77,7 @@ ExecStart=/bin/bash /usr/local/V2ray.Fun/script/config_iptable.sh
 WantedBy=multi-user.target
 EOF
 
+systemctl daemon-reload
 systemctl disable v2ray_iptable.service
 
 # 

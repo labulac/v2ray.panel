@@ -585,7 +585,8 @@ main() {
     if [[ "$V2RAY_RUNNING" -eq '1' ]]; then
         start_v2ray
     else
-        echo 'Please execute the command: systemctl enable v2ray; systemctl start v2ray'
+        systemctl enable v2ray.service
+        systemctl restart v2ray.service
     fi
 }
 

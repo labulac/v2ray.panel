@@ -12,6 +12,17 @@ class V2RayUserConfig(BaseDataItem):
         ProxyGlobal = 2
 
     class AdvanceConfig(BaseDataItem):
+        class InBound:
+            def __init__(self):
+                self.enable_socks_proxy:bool = True
+                self.socks_proxy_port:int = 0
+                self.default_socks_proxy_port = 1080
+            def socks_port(self) -> int:
+                if self.socks_proxy_port > 0:
+                    return self.socks_proxy_port
+                else :
+                    return self.default_socks_proxy_port
+
         class Policy:
             class Type(Enum):
                 ip = auto()
@@ -47,10 +58,12 @@ class V2RayUserConfig(BaseDataItem):
                     return self.default_remote
 
         def __init__(self):
+            self.inbound : V2RayUserConfig.AdvanceConfig.InBound = V2RayUserConfig.AdvanceConfig.InBound()
             self.dns: V2RayUserConfig.AdvanceConfig.DnsConfig = V2RayUserConfig.AdvanceConfig.DnsConfig()
             self.policys:List[V2RayUserConfig.AdvanceConfig.Policy] = []
             self.proxy_preferred = True
             self.enable_mux = True
+            self.block_ad = True
 
     def filename(self):
         return 'config/v2ray_user_config.json'

@@ -280,8 +280,9 @@ class V2RayConfig(DontPickleNone):
         # inbounds
         dokodemo_door = cls._make_inbound_dokodemo_door()
         config.add_inbound(dokodemo_door)
-        socks = cls._make_inbound_socks()
-        config.add_inbound(socks)
+        if user_config.advance_config.inbound.enable_socks_proxy :
+            socks = cls._make_inbound_socks(user_config.advance_config.inbound.socks_port())
+            config.add_inbound(socks)
 
         # outbonds
         direct = cls._make_outbound_direct()
@@ -324,12 +325,15 @@ class V2RayConfig(DontPickleNone):
         if user_config.proxy_mode != V2RayUserConfig.ProxyMode.Direct.value:
             dnsout = cls._make_dnsout_rule()
             ntp = cls._make_ntp_rule()
-            adblock = cls._make_adblock_rule()
             bt = cls._make_bt_rule()
             private = cls._make_private_rule()
             remote_dns = cls._make_ip_remote_dns_rule(user_config.advance_config.dns.remote_dns())
             local_dns = cls._make_ip_local_dns_rule(user_config.advance_config.dns.local_dns())
-            config.routing.rules.extend((dnsout, ntp, adblock, bt, private, local_dns, remote_dns))
+            config.routing.rules.extend((dnsout, ntp, bt, private, local_dns, remote_dns))
+
+            if user_config.advance_config.block_ad :
+                adblock = cls._make_adblock_rule()
+                config.routing.rules.append(adblock)
 
             # user rules
             for policy in user_config.advance_config.policys:
@@ -368,10 +372,10 @@ class V2RayConfig(DontPickleNone):
         return dokodemo_door
 
     @classmethod
-    def _make_inbound_socks(cls) -> Inbound:
+    def _make_inbound_socks(cls, port) -> Inbound:
         socks = Inbound()
         socks.protocol = ProtocolSocks.type
-        socks.port = 1080
+        socks.port = port
         socks.sniffing = Inbound.Sniffing()
 
         settings = ProtocolSocks.Settings()

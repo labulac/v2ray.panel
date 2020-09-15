@@ -3,7 +3,7 @@ from enum import Enum
 import typing
 from typing import List
 from typing import Dict
-import jsonpickle
+from .package import jsonpickle
 from .v2ray_user_config import V2RayUserConfig
 from .node import Node
 

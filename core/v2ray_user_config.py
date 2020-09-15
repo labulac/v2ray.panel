@@ -21,10 +21,10 @@ class V2RayUserConfig(BaseDataItem):
                 proxy = auto()
                 block = auto()
 
-            def __init__(self, contents:List[str], type:Type, outbound:Outbound):
-                self.contents:List[str] = contents
-                self.type:str = type.name
-                self.outbound:str = outbound.name
+            def __init__(self):
+                self.contents:List[str] = []
+                self.type:str = ''
+                self.outbound:str = ''
                 self.enable = True
 
         class DnsConfig:

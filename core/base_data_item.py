@@ -7,7 +7,7 @@ Desc:
 """
 import json
 import os.path
-import jsonpickle
+from .package import jsonpickle
 import collections
 
 class BaseDataItem:

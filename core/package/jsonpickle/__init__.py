@@ -70,7 +70,7 @@ from .unpickler import Unpickler  # noqa: F401
 __all__ = ('encode', 'decode')
 
 # register built-in handlers
-__import__('jsonpickle.handlers', level=0)
+from .handlers import *
 
 # Export specific JSONPluginMgr methods into the jsonpickle namespace
 set_preferred_backend = json.set_preferred_backend

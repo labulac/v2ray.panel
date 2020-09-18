@@ -57,14 +57,12 @@ class V2rayController:
         return ret
 
     def access_log(self) -> str:
-        with open('/var/log/v2ray/access.log') as f:
-            lines = f.read().split("\n")
-            return self.wrap_last_lines(lines)
+        lines = self.tailf('/var/log/v2ray/access.log', 10)
+        return self.wrap_last_lines(lines)
 
     def error_log(self) -> str:
-        with open('/var/log/v2ray/error.log') as f:
-            lines = f.read().split("\n")
-            return self.wrap_last_lines(lines)
+        lines = self.tailf('/var/log/v2ray/error.log', 10)
+        return self.wrap_last_lines(lines)
 
     def wrap_last_lines(self, lines: list) -> str:
         count = min(20, len(lines))
@@ -74,6 +72,10 @@ class V2rayController:
         for line in lines:
             string += line + '<br>'
         return string
+
+    def tailf(self, file, count):
+        lines = subprocess.check_output("tail -n {0} {1}".format(count, file), shell=True).decode('utf-8')
+        return lines.split('\n')
 
     def apply_node(self, user_config:V2RayUserConfig) -> bool:
         config = V2RayConfig.gen_config(user_config)

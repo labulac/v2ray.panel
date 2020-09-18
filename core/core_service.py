@@ -119,6 +119,6 @@ class CoreService:
         outbound = V2RayUserConfig.AdvanceConfig.Policy.Outbound[outbound]
         policy = V2RayUserConfig.AdvanceConfig.Policy()
         policy.contents = contents
-        policy.type = type
-        policy.outbound = outbound
+        policy.type = type.name
+        policy.outbound = outbound.name
         return jsonpickle.encode(policy, indent=4)

@@ -13,6 +13,8 @@
 
 ![4.png](pic/4.png)  
 
+![5.png](pic/5.png)  
+
 ## 硬件支持
 Raspberry Pi 4B  
 [ZeroPi](http://wiki.friendlyarm.com/wiki/index.php/ZeroPi)  

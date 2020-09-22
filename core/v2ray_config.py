@@ -277,6 +277,9 @@ class V2RayConfig(DontPickleNone):
     def gen_config(cls, user_config:V2RayUserConfig) -> str:
         config = V2RayConfig()
 
+        # log
+        config.log.loglevel = Log.Level[user_config.advance_config.log.level].name
+
         # inbounds
         dokodemo_door = cls._make_inbound_dokodemo_door()
         config.add_inbound(dokodemo_door)

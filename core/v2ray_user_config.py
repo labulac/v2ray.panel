@@ -12,6 +12,9 @@ class V2RayUserConfig(BaseDataItem):
         ProxyGlobal = 2
 
     class AdvanceConfig(BaseDataItem):
+        class Log:
+            def __init__(self):
+                self.level = 'warning'
         class InBound:
             def __init__(self):
                 self.enable_socks_proxy:bool = True
@@ -58,6 +61,7 @@ class V2RayUserConfig(BaseDataItem):
                     return self.default_remote
 
         def __init__(self):
+            self.log: V2RayUserConfig.AdvanceConfig.Log = V2RayUserConfig.AdvanceConfig.Log()
             self.inbound : V2RayUserConfig.AdvanceConfig.InBound = V2RayUserConfig.AdvanceConfig.InBound()
             self.dns: V2RayUserConfig.AdvanceConfig.DnsConfig = V2RayUserConfig.AdvanceConfig.DnsConfig()
             self.policys:List[V2RayUserConfig.AdvanceConfig.Policy] = []

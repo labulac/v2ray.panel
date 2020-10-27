@@ -1,6 +1,5 @@
 # encoding: utf-8
 from enum import Enum, auto
-import typing
 from typing import List
 from .base_data_item import BaseDataItem
 from .node import Node

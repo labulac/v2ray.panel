@@ -6,6 +6,7 @@ from typing import Dict
 from .package import jsonpickle
 from .v2ray_user_config import V2RayUserConfig
 from .node import Node
+from .v2ray_default_path import V2rayDefaultPath
 
 class DontPickleNone:
     def __getstate__(self):
@@ -28,8 +29,8 @@ class Log:
         none = 'none'
 
     def __init__(self):
-        self.access:str = '/var/log/v2ray/access.log'
-        self.error:str = '/var/log/v2ray/error.log'
+        self.access:str = V2rayDefaultPath.access_log()
+        self.error:str = V2rayDefaultPath.error_log()
         self.loglevel:str = self.Level.warning.value
 
 class DNS(DontPickleNone):

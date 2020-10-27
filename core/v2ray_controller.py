@@ -10,6 +10,7 @@ import requests
 import sys
 from .v2ray_user_config import V2RayUserConfig
 from .v2ray_config import V2RayConfig
+from .v2ray_default_path import V2rayDefaultPath
 
 class V2rayController:
     def start(self) -> bool:
@@ -57,11 +58,11 @@ class V2rayController:
         return ret
 
     def access_log(self) -> str:
-        lines = self.tailf('/var/log/v2ray/access.log', 10)
+        lines = self.tailf(V2rayDefaultPath.access_log() , 10)
         return lines.replace('\n', '<br>')
 
     def error_log(self) -> str:
-        lines = self.tailf('/var/log/v2ray/error.log', 10)
+        lines = self.tailf(V2rayDefaultPath.error_log(), 10)
         return lines.replace('\n', '<br>')
 
     def tailf(self, file, count)->str:
@@ -73,7 +74,7 @@ class V2rayController:
         return self.apply_config(config)
 
     def apply_config(self, config: str) -> bool:
-        with open('/etc/v2ray/config.json', 'w+') as f:
+        with open(V2rayDefaultPath.config_file(), 'w+') as f:
             f.write(config)
 
         result = self.restart()
@@ -83,41 +84,35 @@ class V2rayController:
         subprocess.check_output("bash ./script/config_iptable.sh", shell=True)
         subprocess.check_output("systemctl enable v2ray_iptable.service", shell=True)
 
-class MokeV2rayController(V2rayController):
+class MacOSV2rayController(V2rayController):
     def start(self) -> bool:
-        return True
+        cmd = "brew services start v2ray-core"
+        subprocess.check_output(cmd, shell=True).decode('utf-8')
+        return self.running()
 
     def stop(self) -> bool:
-        return True
+        cmd = "brew services stop v2ray-core"
+        subprocess.check_output(cmd, shell=True).decode('utf-8')
+        return not self.running()
 
     def restart(self) -> bool:
-        return True
-
-    def running(self) -> bool:
-        return True
-
-    def version(self) -> str:
-        return 'v4.27.0'
+        cmd = "brew services restart v2ray-core"
+        subprocess.check_output(cmd, shell=True).decode('utf-8')
+        return self.running()
 
     def update(self) -> bool:
-        return True
+        update_log = subprocess.check_output("brew upgrade v2ray-core", shell=True).decode('utf-8')
+        ret = update_log.find('built in')
+        if ret:
+            ret = self.restart()
 
-    def access_log(self) -> str:
-        return ''
-
-    def error_log(self) -> str:
-        return ''
-
-    def apply_config(self, config: str) -> bool:
-        with open('config/moke_config.json', 'w+') as f:
-            f.write(config)
-        return True
+        return ret
 
     def enable_iptables(self):
         return
 
 def make_controller():
     if sys.platform == 'darwin':
-        return MokeV2rayController()
+        return MacOSV2rayController()
     else:
         return V2rayController()

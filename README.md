@@ -16,6 +16,7 @@
 ![5.png](pic/5.png)  
 
 ## 硬件支持
+Mac
 Raspberry Pi 4B  
 [ZeroPi](http://wiki.friendlyarm.com/wiki/index.php/ZeroPi)  
 
@@ -24,10 +25,31 @@ Raspberry Pi 4B
 ![zeropi_2.jpg](pic/zeropi_2.jpg)  
 
 ## 系统支持
+MacOS
 Raspberry Pi OS (based on Debian Buster)  
 Armbian (based on Debian Buster)
 
 ## 安装方式
+### Mac
+```
+# 安装 brew
+ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+
+# clone 代码
+cd ~/Documents/
+git clone https://github.com/twotreesus/V2ray.FunPi.git V2ray.Fun
+
+# 安装依赖
+./script/install_osx.sh
+
+# 运行
+python3 app.py
+# 浏览器输入127.0.0.1:1086，即可访问面板
+# 浏览器设置 socks5 代理 127.0.0.1:1080，即可使用
+
+```
+
+### Raspberry Pi
 ```
 sudo su - root
 cd /usr/local

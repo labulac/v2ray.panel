@@ -16,7 +16,7 @@
 ![5.png](pic/5.png)  
 
 ## 硬件支持
-Mac
+Mac  
 Raspberry Pi 4B  
 [ZeroPi](http://wiki.friendlyarm.com/wiki/index.php/ZeroPi)  
 
@@ -25,7 +25,7 @@ Raspberry Pi 4B
 ![zeropi_2.jpg](pic/zeropi_2.jpg)  
 
 ## 系统支持
-MacOS 
+MacOS  
 Raspberry Pi OS (based on Debian Buster)  
 Armbian (based on Debian Buster)
 

@@ -3,7 +3,7 @@
 ## 简介
 
 一个基于 Web 的 V2ray 控制面板，已改造为将树莓派作为旁路由使用，只需要设置好网关，即可代理路由器下所有设备透明翻墙，支持直连\智能分流\全局代理 三种模式，并能自动管理订阅，原理参考 [透明代理(TPROXY)
-](https://guide.v2fly.org/app/tproxy.html)，TG:[https://t.me/v2ray_funpi](https://t.me/v2ray_funpi)
+](https://guide.v2fly.org/app/tproxy.html)，TG讨论组:[https://t.me/v2ray_funpi](https://t.me/v2ray_funpi)
 
 ![1.png](pic/1.png)  
 
@@ -58,7 +58,6 @@ cd V2ray.Fun/script
 ./install.sh
 ```
 
-#### 配置
 修改配置文件
 
 ```

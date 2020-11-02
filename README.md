@@ -38,6 +38,7 @@ ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/
 # clone 代码
 cd ~/Documents/
 git clone https://github.com/twotreesus/V2ray.FunPi.git V2ray.Fun
+cd V2ray.Fun
 
 # 安装依赖
 ./script/install_osx.sh

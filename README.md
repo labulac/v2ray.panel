@@ -59,17 +59,6 @@ cd V2ray.Fun/script
 ./install.sh
 ```
 
-修改配置文件
-
-```
-sudo nano /usr/local/V2ray.Fun/config/app_config.json
-{
-    "user": "admin",
-    "password": "admin",
-    "port": 1099,
-    "proxy_mode": 1
-}
-```
 重启服务
 
 ```
@@ -87,5 +76,33 @@ static routers=192.168.66.1
 static domain_name_servers=192.168.66.1
 ```
 
+重启树莓派
+```
+sudo reboot
+```
+
 然后设置路由器的DHCP网关为 192.168.66.200
 ![router.png](pic/router.png)
+
+配置完成，浏览器输入192.168.66.200:1086，即可访问面板
+
+## 修改启动配置
+修改配置文件，以设置面板用户名、密码，端口，其他设置均可在面板内完成，ps：配置文件内不支持注释
+
+```
+sudo nano /usr/local/V2ray.Fun/config/app_config.json
+
+{
+    "py/object": "core.app_config.AppConfig",
+    "user": "admin",
+    "password": "admin",
+    "port": 1086,
+    "proxy_mode": 1,
+    "inited": true
+}
+```
+
+修改完成后重启服务即可
+``````
+sudo supervisorctl restart v2ray.fun
+```

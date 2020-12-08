@@ -65,7 +65,7 @@ cd V2ray.Fun/script
 sudo supervisorctl restart v2ray.fun
 ```
 
-树莓派修改为静态地址192.168.66.200，这里路由器是192.168.66.1
+设置树莓派为旁路由，树莓派修改为静态地址192.168.66.200，这里路由器是192.168.66.1
 ```
 sudo nano /etc/dhcpcd.conf
 
@@ -103,6 +103,6 @@ sudo nano /usr/local/V2ray.Fun/config/app_config.json
 ```
 
 修改完成后重启服务即可
-``````
+```
 sudo supervisorctl restart v2ray.fun
 ```

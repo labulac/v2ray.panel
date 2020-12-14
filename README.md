@@ -15,19 +15,23 @@
 
 ![5.png](pic/5.png)  
 
+## 系统支持
+MacOS  
+Debian Buster
+Raspberry Pi OS (based on Debian Buster)  
+Armbian (based on Debian Buster)
+
+
 ## 硬件支持
 Mac  
 Raspberry Pi 4B  
 [ZeroPi](http://wiki.friendlyarm.com/wiki/index.php/ZeroPi)  
+斐讯 N1
+其他任何运行 Debian Buster 的x86、x64 主机/虚拟机/Docker镜像
 
 ![zeropi_1.jpg](pic/zeropi_1.jpg)  
 
 ![zeropi_2.jpg](pic/zeropi_2.jpg)  
-
-## 系统支持
-MacOS  
-Raspberry Pi OS (based on Debian Buster)  
-Armbian (based on Debian Buster)
 
 ## 安装方式
 ### Mac
@@ -50,7 +54,7 @@ python3 app.py
 浏览器输入127.0.0.1:1086，即可访问面板  
 浏览器设置 socks5 代理 127.0.0.1:1080，即可使用，Chrome 浏览器推荐使用 SwitchyOmega  
 
-### Raspberry Pi
+### Debian Buster
 ```
 sudo su - root
 cd /usr/local

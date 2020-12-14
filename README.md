@@ -17,7 +17,7 @@
 
 ## 系统支持
 MacOS  
-Debian Buster
+Debian Buster  
 Raspberry Pi OS (based on Debian Buster)  
 Armbian (based on Debian Buster)
 
@@ -26,8 +26,8 @@ Armbian (based on Debian Buster)
 Mac  
 Raspberry Pi 4B  
 [ZeroPi](http://wiki.friendlyarm.com/wiki/index.php/ZeroPi)  
-斐讯 N1
-其他任何运行 Debian Buster 的x86、x64 主机/虚拟机/Docker镜像
+斐讯 N1  
+其他任何运行 Debian Buster 的x86、x64 主机/虚拟机/Docker镜像 
 
 ![zeropi_1.jpg](pic/zeropi_1.jpg)  
 

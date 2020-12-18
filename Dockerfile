@@ -1,27 +1,23 @@
-from v2fly/v2fly-core
+FROM v2fly/v2fly-core
 
-run sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
+
+RUN mkdir -p /usr/local/V2ray.Fun
+COPY . /usr/local/V2ray.Fun
 
 RUN set -ex \
-	&& apk add linux-headers wget gcc g++ python3 python3-dev openssl ca-certificates supervisor
+	&& apk add linux-headers wget gcc g++ python3 python3-dev openssl ca-certificates supervisor \
+	&& wget https://bootstrap.pypa.io/get-pip.py \
+	&& python3 get-pip.py \
+	&& pip3 install -r /usr/local/V2ray.Fun/script/requirements.txt -i http://mirrors.aliyun.com/pypi/simple --trusted-host mirrors.aliyun.com \
+	&& apk del wget gcc g++ python3-dev
 
-run wget https://bootstrap.pypa.io/get-pip.py \
-	&& python3 get-pip.py
+RUN mkdir /etc/supervisor.d \
+	&& cp /usr/local/V2ray.Fun/script/docker/v2ray.ini /etc/supervisor.d/v2ray.ini
 
-run mkdir -p /usr/local/V2ray.FunPi
-copy . /usr/local/V2ray.FunPi
+EXPOSE 1080
+EXPOSE 1086
 
-run pip3 install -r /usr/local/V2ray.FunPi/script/requirements.txt -i http://mirrors.aliyun.com/pypi/simple --trusted-host mirrors.aliyun.com
-
-run mkdir /etc/supervisor.d \
-	&& cp /usr/local/V2ray.FunPi/script/docker/v2ray.ini /etc/supervisor.d/v2ray.ini \
-	&& mv /usr/local/V2ray.FunPi /usr/local/V2ray.Fun
-
-expose 1080
-expose 1086
-
-volume /etc/v2ray
-
-cmd supervisord -c /etc/supervisord.conf && sh /usr/local/V2ray.Fun/script/start.sh run
+CMD supervisord -c /etc/supervisord.conf && sh /usr/local/V2ray.Fun/script/start.sh run
 
 

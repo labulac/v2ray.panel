@@ -10,7 +10,7 @@ run wget https://bootstrap.pypa.io/get-pip.py \
 
 run cd /usr/local/ \
 	&& export all_proxy=socks5://192.168.1.15:1080 \
-	&& git clone -b docker --depth=1 https://github.com/twotreesus/V2ray.FunPi.git \
+	&& git clone -b docker --depth=1 https://github.com/raydoom/V2ray.FunPi.git \
 	&& unset all_proxy
 
 run pip3 install -r /usr/local/V2ray.FunPi/script/requirements.txt -i http://mirrors.aliyun.com/pypi/simple --trusted-host mirrors.aliyun.com

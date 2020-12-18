@@ -3,13 +3,13 @@ from v2fly/v2fly-core
 run sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
 
 RUN set -ex \
-	&& apk add linux-headers wget gcc g++ git python3 python3-dev openssl ca-certificates supervisor
+	&& apk add linux-headers wget gcc g++ python3 python3-dev openssl ca-certificates supervisor
 
 run wget https://bootstrap.pypa.io/get-pip.py \
 	&& python3 get-pip.py
 
-copy . /usr/local/
-run ls /usr/local/
+run mkdir -p /usr/local/V2ray.FunPi
+copy . /usr/local/V2ray.FunPi
 
 run pip3 install -r /usr/local/V2ray.FunPi/script/requirements.txt -i http://mirrors.aliyun.com/pypi/simple --trusted-host mirrors.aliyun.com
 
@@ -22,6 +22,6 @@ expose 1086
 
 volume /etc/v2ray
 
-cmd  supervisord -c /etc/supervisord.conf && sh /usr/local/V2ray.Fun/script/start.sh run
+cmd supervisord -c /etc/supervisord.conf && sh /usr/local/V2ray.Fun/script/start.sh run
 
 

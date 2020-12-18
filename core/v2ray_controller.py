@@ -14,17 +14,17 @@ from .v2ray_default_path import V2rayDefaultPath
 
 class V2rayController:
     def start(self) -> bool:
-        cmd = "systemctl start v2ray.service"
+        cmd = "systemctl start v2ray.service; supervisorctl start v2ray"
         subprocess.check_output(cmd, shell=True).decode('utf-8')
         return self.running()
 
     def stop(self) -> bool:
-        cmd = "systemctl stop v2ray.service"
+        cmd = "systemctl stop v2ray.service; supervisorctl stop v2ray"
         subprocess.check_output(cmd, shell=True).decode('utf-8')
         return not self.running()
 
     def restart(self) -> bool:
-        cmd = "systemctl restart v2ray.service"
+        cmd = "systemctl restart v2ray.service; supervisorctl restart v2ray"
         subprocess.check_output(cmd, shell=True).decode('utf-8')
         return self.running()
 

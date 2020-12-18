@@ -1,10 +1,26 @@
-FROM python:3.8-slim-buster
+from v2fly/v2fly-core
+
+run sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
+
+RUN set -ex \
+	&& apk add linux-headers wget gcc g++ git python3 python3-dev openssl ca-certificates supervisor
+
+run wget https://bootstrap.pypa.io/get-pip.py \
+	&& python3 get-pip.py
+
+run cd /usr/local/ \
+	&& export all_proxy=socks5://192.168.1.15:1080 \
+	&& git clone -b docker --depth=1 https://github.com/twotreesus/V2ray.FunPi.git \
+	&& unset all_proxy
+
+run pip3 install -r /usr/local/V2ray.FunPi/script/requirements.txt -i http://mirrors.aliyun.com/pypi/simple --trusted-host mirrors.aliyun.com
 
 expose 1080
 expose 1086
 
-ADD install.sh /root/
-ADD run.sh /root/
+copy /usr/local/script/docker/v2ray.ini /etc/supervisor.d/v2ray.ini
+run mv /usr/local/V2ray.FunPi /usr/local/V2ray.Fun
 
-RUN chmod +x /root/install.sh && /root/install.sh
-CMD chmod +x /root/run.sh && /root/run.sh
+cmd  supervisord -c /etc/supervisord.conf && sh /usr/local/V2ray.Fun/script/start.sh run
+
+

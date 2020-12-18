@@ -92,7 +92,7 @@ sudo reboot
 ## docker
 默认docker镜像目前支持amd64和arm64平台
 ```
-docker run --name=v2ray-funpi -p 1080:1080 -p 1086:1086 raydoom/v2ray-funpi
+docker run -d --restart=unless-stopped --name=v2ray-funpi -p 1080:1080 -p 1086:1086 raydoom/v2ray-funpi
 ```
 浏览器输入DOCKER_HOST_IP:1086，即可访问面板  
 其中，DOCKER_HOST_IP为docker主机ip地址  

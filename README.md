@@ -89,11 +89,14 @@ sudo reboot
 ![router.png](pic/router.png)
 
 配置完成，浏览器输入192.168.66.200:1086，即可访问面板
-## docker
-默认docker镜像目前支持amd64和arm64平台
+
+### Docker
+Docker镜像目前支持amd64和arm64平台，感谢[raydoom](https://github.com/raydoom)提供支持，镜像已上传到dockerhub，可直接拉取使用，如需要也可以用根目录下的Dockerfile自行编译镜像
+
 ```
 docker run -d --restart=unless-stopped --name=v2ray-funpi -p 1080:1080 -p 1086:1086 raydoom/v2ray-funpi
 ```
+
 浏览器输入DOCKER_HOST_IP:1086，即可访问面板  
 其中，DOCKER_HOST_IP为docker主机ip地址  
 浏览器设置 socks5 代理 DOCKER_HOST_IP:1080，即可使用，Chrome 浏览器推荐使用 SwitchyOmega  

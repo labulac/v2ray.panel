@@ -51,6 +51,7 @@ class NodeManager(BaseDataItem):
     def update(self, url):
         group = self.subscribes[url]
         self.update_group(group)
+        self.save()
 
     def update_all(self):
         for url in self.subscribes.keys():

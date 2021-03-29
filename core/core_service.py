@@ -73,7 +73,7 @@ class CoreService:
         result = False
         node = cls.node_manager.find_node(url, index)
         cls.user_config.node = node
-        if cls.v2ray.apply_node(cls.user_config):
+        if cls.v2ray.apply_node(cls.user_config, cls.node_manager.all_nodes()):
             cls.user_config.save()
 
             if not cls.app_config.inited:
@@ -88,7 +88,7 @@ class CoreService:
     def switch_mode(cls, proxy_mode: int) -> bool:
         cls.user_config.proxy_mode = proxy_mode
         result = True
-        result = cls.v2ray.apply_node(cls.user_config)
+        result = cls.v2ray.apply_node(cls.user_config, cls.node_manager.all_nodes())
         if result:
             cls.user_config.save()
 
@@ -99,7 +99,7 @@ class CoreService:
         result = True
         new_advance = cls.user_config.advance_config.load_data(config)
         cls.user_config.advance_config = new_advance
-        result = cls.v2ray.apply_node(cls.user_config)
+        result = cls.v2ray.apply_node(cls.user_config, cls.node_manager.all_nodes())
         if result:
             cls.user_config.save()
         return  result
@@ -108,7 +108,7 @@ class CoreService:
     def reset_advance_config(cls):
         result = True
         cls.user_config.advance_config = V2RayUserConfig.AdvanceConfig()
-        result = cls.v2ray.apply_node(cls.user_config)
+        result = cls.v2ray.apply_node(cls.user_config, cls.node_manager.all_nodes())
         if result:
             cls.user_config.save()
         return result

@@ -9,9 +9,11 @@ import subprocess
 import requests
 import sys
 import os
+from typing import List
 from .v2ray_user_config import V2RayUserConfig
 from .v2ray_config import V2RayConfig
 from .v2ray_default_path import V2rayDefaultPath
+from .node import Node
 
 class V2rayController:
     def start(self) -> bool:
@@ -70,8 +72,8 @@ class V2rayController:
         lines = subprocess.check_output("tail -n {0} {1}".format(count, file), shell=True).decode('utf-8')
         return  lines
 
-    def apply_node(self, user_config:V2RayUserConfig) -> bool:
-        config = V2RayConfig.gen_config(user_config)
+    def apply_node(self, user_config:V2RayUserConfig, all_nodes: List[Node]) -> bool:
+        config = V2RayConfig.gen_config(user_config, all_nodes)
         return self.apply_config(config)
 
     def apply_config(self, config: str) -> bool:

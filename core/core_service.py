@@ -69,11 +69,45 @@ class CoreService:
         return result
 
     @classmethod
+    def add_subscribe(cls, url):
+        cls.node_manager.add_subscribe(url)
+        cls.re_apply_node()
+
+    @classmethod
+    def remove_subscribe(cls, url):
+        cls.node_manager.remove_subscribe(url)
+        cls.re_apply_node()
+
+    @classmethod
+    def update_all_subscribe(cls):
+        cls.node_manager.update_all()
+        cls.re_apply_node()
+
+    @classmethod
+    def update_subscribe(cls, url):
+        cls.node_manager.update(url)
+        cls.re_apply_node()
+
+    @classmethod
+    def add_manual_node(cls, url):
+        cls.node_manager.add_manual_node(url)
+        cls.re_apply_node()
+
+    @classmethod
+    def delete_node(cls, url, index):
+        cls.node_manager.delete_node(url, index)
+        cls.re_apply_node()
+
+    @classmethod
+    def re_apply_node(cls) -> bool:
+        return cls.v2ray.apply_node(cls.user_config, cls.node_manager.all_nodes())
+
+    @classmethod
     def apply_node(cls, url:str, index: int) -> bool:
         result = False
         node = cls.node_manager.find_node(url, index)
         cls.user_config.node = node
-        if cls.v2ray.apply_node(cls.user_config, cls.node_manager.all_nodes()):
+        if cls.re_apply_node():
             cls.user_config.save()
 
             if not cls.app_config.inited:
@@ -88,7 +122,7 @@ class CoreService:
     def switch_mode(cls, proxy_mode: int) -> bool:
         cls.user_config.proxy_mode = proxy_mode
         result = True
-        result = cls.v2ray.apply_node(cls.user_config, cls.node_manager.all_nodes())
+        result = cls.re_apply_node()
         if result:
             cls.user_config.save()
 
@@ -99,7 +133,7 @@ class CoreService:
         result = True
         new_advance = cls.user_config.advance_config.load_data(config)
         cls.user_config.advance_config = new_advance
-        result = cls.v2ray.apply_node(cls.user_config, cls.node_manager.all_nodes())
+        result = cls.re_apply_node()
         if result:
             cls.user_config.save()
         return  result
@@ -108,7 +142,7 @@ class CoreService:
     def reset_advance_config(cls):
         result = True
         cls.user_config.advance_config = V2RayUserConfig.AdvanceConfig()
-        result = cls.v2ray.apply_node(cls.user_config, cls.node_manager.all_nodes())
+        result = cls.re_apply_node()
         if result:
             cls.user_config.save()
         return result

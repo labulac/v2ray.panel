@@ -103,7 +103,7 @@ def add_subscribe_api():
     result = K.failed
     try:
         url = request.args.get(K.subscribe)
-        CoreService.node_manager.add_subscribe(url)
+        CoreService.add_subscribe(url)
         result = K.ok
     except:
         pass
@@ -115,7 +115,7 @@ def add_manual_node_api():
     result = K.failed
     try:
         url = request.args.get(K.url)
-        CoreService.node_manager.add_manual_node(url)
+        CoreService.add_manual_node(url)
         result = K.ok
     except:
         pass
@@ -127,7 +127,7 @@ def remove_subscribe_api():
     result = K.failed
     try:
         url = request.args.get(K.subscribe)
-        CoreService.node_manager.remove_subscribe(url)
+        CoreService.remove_subscribe(url)
         result = K.ok
     except:
         pass
@@ -138,7 +138,7 @@ def remove_subscribe_api():
 def update_all_subscribe_api():
     result = K.failed
     try:
-        CoreService.node_manager.update_all()
+        CoreService.update_all_subscribe()
         result = K.ok
     except:
         pass
@@ -149,7 +149,7 @@ def update_subscribe_api():
     result = K.failed
     try:
         url = request.args.get(K.subscribe)
-        CoreService.node_manager.update(url)
+        CoreService.update_subscribe(url)
         result = K.ok
     except:
         pass
@@ -194,7 +194,7 @@ def delete_node_api():
     url = request.args.get(K.subscribe)
     index = request.args.get(K.node_index)
     index = int(index)
-    CoreService.node_manager.delete_node(url, index)
+    CoreService.delete_node(url, index)
     return jsonify({K.result: K.ok})
 
 @app.route('/get_advance_config')

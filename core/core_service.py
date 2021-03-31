@@ -217,7 +217,7 @@ class CoreService:
 
         try:
             http.get(detect.detect_url)
-            # successed nothing to do, just return
+            print('detected connetion success, nothing to do, just return')
             return
         except Exception as e:
             print('detected connetion failed, detail:\n{0}'.format(e))

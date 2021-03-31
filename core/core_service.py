@@ -10,10 +10,15 @@ import os
 import os.path
 from .package import jsonpickle
 from typing import List
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.schedulers.base import *
+import requests
+from urllib3.util.retry import Retry
+from requests.adapters import HTTPAdapter
+import random
 
 from .app_config import AppConfig
 from .v2ray_controller import V2rayController, make_controller
-
 from .node_manager import NodeManager
 from .keys import Keyword as K
 from .v2ray_user_config import V2RayUserConfig
@@ -22,7 +27,8 @@ class CoreService:
     app_config : AppConfig = None
     user_config: V2RayUserConfig = V2RayUserConfig()
     v2ray:V2rayController = make_controller()
-    node_manager = NodeManager()
+    node_manager:NodeManager = NodeManager()
+    scheduler:BackgroundScheduler = BackgroundScheduler()
 
     @classmethod
     def load(cls):
@@ -33,6 +39,8 @@ class CoreService:
         cls.app_config = AppConfig().load()
         cls.node_manager = NodeManager().load()
         cls.user_config = V2RayUserConfig().load()
+
+        cls.start_auto_detect_if_needed()
 
     @classmethod
     def status(cls) -> dict:
@@ -100,7 +108,22 @@ class CoreService:
 
     @classmethod
     def re_apply_node(cls) -> bool:
-        return cls.v2ray.apply_node(cls.user_config, cls.node_manager.all_nodes())
+        result = cls.v2ray.apply_node(cls.user_config, cls.node_manager.all_nodes())
+        cls.start_auto_detect_if_needed()
+        return result
+
+    @classmethod
+    def start_auto_detect_if_needed(cls):
+        cls.auto_detect_cancel()
+        if cls.user_config.advance_config.auto_detect.enabled :
+            cls.auto_detect_start()
+
+    @classmethod
+    def stop_v2ray(cls) -> bool:
+        result = cls.v2ray.stop()
+        cls.auto_detect_cancel()
+
+        return result
 
     @classmethod
     def apply_node(cls, url:str, index: int) -> bool:
@@ -114,7 +137,6 @@ class CoreService:
                 cls.v2ray.enable_iptables()
                 cls.app_config.inited = True
                 cls.app_config.save()
-
             result = True
         return result
 
@@ -156,3 +178,74 @@ class CoreService:
         policy.type = type.name
         policy.outbound = outbound.name
         return jsonpickle.encode(policy, indent=4)
+
+    @classmethod
+    def auto_detect_start(cls):
+        cls.scheduler.add_job(CoreService.auto_detect_job, trigger='interval', seconds=cls.user_config.advance_config.auto_detect.detect_span, id=K.auto_detect)
+        if cls.scheduler.state is not STATE_RUNNING :
+            cls.scheduler.start()
+
+    @classmethod
+    def auto_detect_cancel(cls):
+        job = cls.scheduler.get_job(K.auto_detect)
+        if job:
+            job.remove()
+
+    @classmethod
+    def auto_detect_job(cls):
+        detect:V2RayUserConfig.AdvanceConfig.AutoDetectAndSwitch = cls.user_config.advance_config.auto_detect
+
+        DEFAULT_TIMEOUT = 5 # seconds
+        class TimeoutHTTPAdapter(HTTPAdapter):
+            def __init__(self, *args, **kwargs):
+                self.timeout = DEFAULT_TIMEOUT
+                if "timeout" in kwargs:
+                    self.timeout = kwargs["timeout"]
+                    del kwargs["timeout"]
+                super().__init__(*args, **kwargs)
+
+            def send(self, request, **kwargs):
+                timeout = kwargs.get("timeout")
+                if timeout is None:
+                    kwargs["timeout"] = self.timeout
+                return super().send(request, **kwargs)
+
+        # begin detect
+        retries = Retry(total=detect.failed_count, backoff_factor=1, status_forcelist=[429, 500, 502, 503, 504])
+        http = requests.Session()
+        http.mount("https://", TimeoutHTTPAdapter(max_retries=retries, timeout=detect.timeout))
+
+        try:
+            http.get(detect.detect_url)
+            # successed nothing to do, just return
+            return
+        except Exception as e:
+            print('detected connetion failed, detail:\n{0}'.format(e))
+
+        # failed prepare to switch node
+        ping_groups = cls.node_manager.ping_test_all()
+        class NodePingInfo:
+            def __init__(self, group_key:str, node_ps:str, ping:int):
+                self.group_key:str = group_key
+                self.node_ps:str = node_ps
+                self.ping:int = ping
+
+            def __lt__(self, other):
+                return self.ping < other.ping
+
+        ping_results = []
+        for group in ping_groups:
+            group_key = group[K.subscribe]
+            nodes = group[K.nodes]
+            for node_ps in nodes.keys():
+                ping = nodes[node_ps]
+                info = NodePingInfo(group_key, node_ps, ping)
+                ping_results.append(info)
+
+        ping_results.sort()
+        best_nodes = ping_results[:5]
+        random.shuffle(best_nodes)
+        best_node = best_nodes[0]
+
+        node_index = cls.node_manager.find_node_index(best_node.group_key, best_node.node_ps)
+        cls.apply_node(best_node.group_key, node_index)

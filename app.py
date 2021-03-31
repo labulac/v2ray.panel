@@ -6,9 +6,10 @@ from flask_basicauth import BasicAuth
 from core.keys import Keyword as K
 from core.core_service import CoreService
 
-CoreService.load()
+
 dir_path = os.path.dirname(os.path.realpath(__file__))
 os.chdir(dir_path)
+CoreService.load()
 
 app = Flask(__name__, static_url_path='/static')
 app.config['BASIC_AUTH_USERNAME'] = CoreService.app_config.user
@@ -42,7 +43,7 @@ def log_page():
 @app.route('/start_service')
 def start_service_api():
     result = K.failed
-    if CoreService.v2ray.start():
+    if CoreService.re_apply_node():
         result = K.ok
 
     return jsonify({ K.result : result })
@@ -50,14 +51,14 @@ def start_service_api():
 @app.route('/stop_service')
 def stop_service_api():
     result = K.failed
-    if CoreService.v2ray.stop():
+    if CoreService.stop_v2ray():
         result = K.ok
     return jsonify({K.result: result})
 
 @app.route('/restart_service')
 def restart_service_api():
     result = K.failed
-    if CoreService.v2ray.restart():
+    if CoreService.re_apply_node():
         result = K.ok
     return jsonify({K.result: result})
 

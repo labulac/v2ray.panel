@@ -58,12 +58,20 @@ class V2RayUserConfig(BaseDataItem):
                     return self.remote
                 else:
                     return self.default_remote
+        class AutoDetectAndSwitch:
+            def __init__(self):
+                self.enabled = True
+                self.detect_span = 60
+                self.detect_url = 'https://github.com/'
+                self.failed_count = 3
+                self.timeout = 1.0
 
         def __init__(self):
             self.log: V2RayUserConfig.AdvanceConfig.Log = V2RayUserConfig.AdvanceConfig.Log()
             self.inbound : V2RayUserConfig.AdvanceConfig.InBound = V2RayUserConfig.AdvanceConfig.InBound()
             self.dns: V2RayUserConfig.AdvanceConfig.DnsConfig = V2RayUserConfig.AdvanceConfig.DnsConfig()
             self.policys:List[V2RayUserConfig.AdvanceConfig.Policy] = []
+            self.auto_detect: V2RayUserConfig.AdvanceConfig.AutoDetectAndSwitch = V2RayUserConfig.AdvanceConfig.AutoDetectAndSwitch()
             self.proxy_preferred = True
             self.enable_mux = True
             self.block_ad = True

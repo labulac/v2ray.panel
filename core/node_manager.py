@@ -99,6 +99,18 @@ class NodeManager(BaseDataItem):
             node = self.subscribes[url].nodes[index]
         return node
 
+    def find_node_index(self, url:str, node_ps:str):
+        node_list = None
+        if url == K.manual:
+            node_list = self.manual_nodes
+        else:
+            node_list = self.subscribes[url].nodes
+        for node in node_list:
+            if node.ps == node_ps:
+                return node_list.index(node)
+
+        return -1
+
     def all_nodes(self) ->list :
         nodes = []
         for url in self.subscribes.keys():

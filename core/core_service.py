@@ -254,5 +254,6 @@ class CoreService:
 
         node_index = cls.node_manager.find_node_index(best_node.group_key, best_node.node_ps)
         cls.apply_node(best_node.group_key, node_index)
-        detect.last_switch_time = datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
+
+        detect.last_switch_time = '{0} ---- {1}'.format(datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S'), best_node.node_ps)
         cls.user_config.save()

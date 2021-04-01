@@ -34,7 +34,10 @@
                 <tr>
                     <td>时间间隔</td>
                     <td colspan="2">
-                        <input id="detect_time_span" class="mdui-textfield-input mdui-col-sm-3 mdui-typo-display-1" type="number" onchange="detect_time_span_change()"/>
+                        <div>
+                            <input id="detect_time_span" class="mdui-textfield-input mdui-col-sm-3 mdui-typo-display-1" type="number" onchange="detect_time_span_change()" style="text-align: center;max-width: 50px"/>
+                        </div>
+
                     </td>
                     <td colspan="3">
                         <div class="mdui-typo-caption-opacity">单位：秒，整数，范围：10-3600</div>
@@ -43,7 +46,7 @@
                 <tr>
                     <td>请求超时</td>
                     <td colspan="2">
-                        <input id="detect_timeout" class="mdui-textfield-input mdui-col-sm-3 mdui-typo-display-1" type="number" onchange="detect_timeout_change()"/>
+                        <input id="detect_timeout" class="mdui-textfield-input mdui-col-sm-3 mdui-typo-display-1" type="number" onchange="detect_timeout_change()" style="text-align: center;max-width: 50px"/>
                     </td>
                     <td colspan="3">
                         <div class="mdui-typo-caption-opacity">单位：秒，支持小数，范围：0.5-10</div>
@@ -52,7 +55,7 @@
                 <tr>
                     <td>重试次数</td>
                     <td colspan="2">
-                        <input id="detect_max_retry" class="mdui-textfield-input mdui-col-sm-3 mdui-typo-display-1" type="number" onchange="detect_max_retry_change()"/>
+                        <input id="detect_max_retry" class="mdui-textfield-input mdui-col-sm-3 mdui-typo-display-1" type="number" onchange="detect_max_retry_change()" style="text-align: center;max-width: 50px"/>
                     </td>
                     <td colspan="3">
                         <div class="mdui-typo-caption-opacity">达到重试次数后触发切换，范围：1-10</div>

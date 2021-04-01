@@ -41,7 +41,7 @@ class CoreService:
         cls.node_manager = NodeManager().load()
         cls.user_config = V2RayUserConfig().load()
 
-        cls.start_auto_detect_if_needed()
+        cls.restart_auto_detect()
 
     @classmethod
     def status(cls) -> dict:
@@ -108,16 +108,16 @@ class CoreService:
         cls.re_apply_node()
 
     @classmethod
-    def re_apply_node(cls) -> bool:
+    def re_apply_node(cls, restart_auto_detect=True) -> bool:
         result = cls.v2ray.apply_node(cls.user_config, cls.node_manager.all_nodes())
-        cls.start_auto_detect_if_needed()
+        if restart_auto_detect:
+            cls.restart_auto_detect()
         return result
 
     @classmethod
-    def start_auto_detect_if_needed(cls):
-        if not cls.user_config.advance_config.auto_detect.enabled :
-            cls.auto_detect_cancel()
-        else :
+    def restart_auto_detect(cls):
+        cls.auto_detect_cancel()
+        if cls.user_config.advance_config.auto_detect.enabled :
             cls.auto_detect_start()
 
     @classmethod
@@ -128,11 +128,11 @@ class CoreService:
         return result
 
     @classmethod
-    def apply_node(cls, url:str, index: int) -> bool:
+    def apply_node(cls, url:str, index: int, restart_auto_detect=True) -> bool:
         result = False
         node = cls.node_manager.find_node(url, index)
         cls.user_config.node = node
-        if cls.re_apply_node():
+        if cls.re_apply_node(restart_auto_detect):
             cls.user_config.save()
 
             if not cls.app_config.inited:
@@ -183,10 +183,7 @@ class CoreService:
 
     @classmethod
     def auto_detect_start(cls):
-        job = cls.scheduler.get_job(K.auto_detect)
-        if not job:
-            cls.scheduler.add_job(CoreService.auto_detect_job, trigger='interval', seconds=cls.user_config.advance_config.auto_detect.detect_span, id=K.auto_detect)
-
+        cls.scheduler.add_job(CoreService.auto_detect_job, trigger='interval', seconds=cls.user_config.advance_config.auto_detect.detect_span, id=K.auto_detect)
         if cls.scheduler.state is not STATE_RUNNING :
             cls.scheduler.start()
 
@@ -253,7 +250,7 @@ class CoreService:
         best_node = best_nodes[0]
 
         node_index = cls.node_manager.find_node_index(best_node.group_key, best_node.node_ps)
-        cls.apply_node(best_node.group_key, node_index)
+        cls.apply_node(best_node.group_key, node_index, restart_auto_detect=False)
 
         detect.last_switch_time = '{0} ---- {1}'.format(datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S'), best_node.node_ps)
         cls.user_config.save()

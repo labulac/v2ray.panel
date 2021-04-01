@@ -16,6 +16,7 @@ import requests
 from urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
 import random
+import time
 
 from .app_config import AppConfig
 from .v2ray_controller import V2rayController, make_controller
@@ -114,8 +115,9 @@ class CoreService:
 
     @classmethod
     def start_auto_detect_if_needed(cls):
-        cls.auto_detect_cancel()
-        if cls.user_config.advance_config.auto_detect.enabled :
+        if not cls.user_config.advance_config.auto_detect.enabled :
+            cls.auto_detect_cancel()
+        else :
             cls.auto_detect_start()
 
     @classmethod
@@ -181,7 +183,10 @@ class CoreService:
 
     @classmethod
     def auto_detect_start(cls):
-        cls.scheduler.add_job(CoreService.auto_detect_job, trigger='interval', seconds=cls.user_config.advance_config.auto_detect.detect_span, id=K.auto_detect)
+        job = cls.scheduler.get_job(K.auto_detect)
+        if not job:
+            cls.scheduler.add_job(CoreService.auto_detect_job, trigger='interval', seconds=cls.user_config.advance_config.auto_detect.detect_span, id=K.auto_detect)
+
         if cls.scheduler.state is not STATE_RUNNING :
             cls.scheduler.start()
 
@@ -249,3 +254,5 @@ class CoreService:
 
         node_index = cls.node_manager.find_node_index(best_node.group_key, best_node.node_ps)
         cls.apply_node(best_node.group_key, node_index)
+        detect.last_switch_time = datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
+        cls.user_config.save()

@@ -65,6 +65,7 @@ class V2RayUserConfig(BaseDataItem):
                 self.detect_url = 'https://github.com/'
                 self.failed_count = 3
                 self.timeout = 1.0
+                self.last_switch_time = ''
 
         def __init__(self):
             self.log: V2RayUserConfig.AdvanceConfig.Log = V2RayUserConfig.AdvanceConfig.Log()

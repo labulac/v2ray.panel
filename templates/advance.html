@@ -6,25 +6,82 @@
             <table id="advance_table" class="mdui-table">
                 <tbody>
                 <tr>
+                    <td class="mdui-typo">
+                        <h5>自动切换</h5>
+                    </td>
+                    <td colspan="5">
+                        <div class="mdui-typo mdui-typo-caption-opacity"><h6>按预设的探测地址和间隔时间进行 https 请求测试，如果连续超时或失败超过指定次数，则自动切换到根据 ping 值优先的节点</h6></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>启用</td>
+                    <td colspan="5">
+                        <label class="mdui-switch">
+                            <input id="enable_auto_switch" type="checkbox" checked onchange="enable_auto_detect_change()"/>
+                            <i class="mdui-switch-icon"></i>
+                        </label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>探测地址</td>
+                    <td colspan="2">
+                        <input id="detect_url" class="mdui-textfield-input mdui-col-sm-3 mdui-typo-display-1" type="text" onchange="detect_url_change()"/>
+                    </td>
+                    <td colspan="3">
+                        <div class="mdui-typo-caption-opacity">必须为 https 开头的国外地址</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>时间间隔</td>
+                    <td colspan="2">
+                        <input id="detect_time_span" class="mdui-textfield-input mdui-col-sm-3 mdui-typo-display-1" type="number" onchange="detect_time_span_change()"/>
+                    </td>
+                    <td colspan="3">
+                        <div class="mdui-typo-caption-opacity">单位：秒，整数，范围：10-3600</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>请求超时</td>
+                    <td colspan="2">
+                        <input id="detect_timeout" class="mdui-textfield-input mdui-col-sm-3 mdui-typo-display-1" type="number" onchange="detect_timeout_change()"/>
+                    </td>
+                    <td colspan="3">
+                        <div class="mdui-typo-caption-opacity">单位：秒，支持小数，范围：0.5-10</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>重试次数</td>
+                    <td colspan="2">
+                        <input id="detect_max_retry" class="mdui-textfield-input mdui-col-sm-3 mdui-typo-display-1" type="number" onchange="detect_max_retry_change()"/>
+                    </td>
+                    <td colspan="3">
+                        <div class="mdui-typo-caption-opacity">达到重试次数后触发切换，范围：1-10</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>最近切换</td>
+                    <td colspan="5">
+                        <div id="detect_last_switch_time" class="mdui-col-sm-3 mdui-typo-caption-opacity"></div>
+                    </td>
+                </tr>
+                <tr class="mdui-color-grey-100"><td colspan="6"></td></tr>
+                <tr>
                     <td colspan="6" class="mdui-typo">
                         <h5>本地代理</h5>
                     </td>
                 </tr>
                 <tr>
                     <td>Socks 5 代理</td>
-                    <td colspan="2">
+                    <td colspan="5">
                         <label class="mdui-switch">
                             <input id="enable_socks_proxy" type="checkbox" checked onchange="enable_socks_proxy_change()"/>
                             <i class="mdui-switch-icon"></i>
                         </label>
                     </td>
-                    <td colspan="3">
-                        <div class="mdui-typo-caption-opacity"></div>
-                    </td>
                 </tr>
                 <tr>
                     <td>端口</td>
-                    <td colspan="6">
+                    <td colspan="5">
                         <div class="mdui-row mdui-valign">
                             <div id="socks_proxy_port" class="mdui-col-sm-3"></div>
                             <div id="modify_socks_proxy_port" class="mdui-col-sm-2">
@@ -36,6 +93,7 @@
                         </div>
                     </td>
                 </tr>
+                <tr class="mdui-color-grey-100"><td colspan="6"></td></tr>
                 <tr>
                     <td colspan="6" class="mdui-typo">
                         <h5>DNS 服务器</h5>
@@ -43,7 +101,7 @@
                 </tr>
                 <tr>
                     <td>国内 DNS</td>
-                    <td colspan="6">
+                    <td colspan="5">
                         <div class="mdui-row mdui-valign">
                             <div id="local_dns" class="mdui-col-sm-3"></div>
                             <div id="modify_local_dns" class="mdui-col-sm-2">
@@ -339,6 +397,22 @@
             $('#apply').hide();
         }
 
+        // auto detect
+        var detect_url = g_config_local['auto_detect']['detect_url'];
+        $("#detect_url").val(detect_url);
+
+        var detect_time_span = g_config_local['auto_detect']['detect_span'];
+        $("#detect_time_span").val(detect_time_span);
+
+        var detect_timeout = g_config_local['auto_detect']['timeout'];
+        $("#detect_timeout").val(detect_timeout);
+
+        var detect_max_retry = g_config_local['auto_detect']['failed_count'];
+        $("#detect_max_retry").val(detect_max_retry);
+
+        var detect_last_switch = g_config_local['auto_detect']['last_switch_time'];
+        $("#detect_last_switch_time").html(detect_last_switch);
+
         // log
         var log_index = g_log_levels.indexOf(g_config_local['log']['level']);
         $("#select_log_level").prop('selectedIndex', log_index);
@@ -577,6 +651,64 @@
                 refresh_remote();
             });
         });
+    }
+    
+    function enable_auto_detect_change() {
+        g_config_local['auto_detect']['enabled'] = $("#enable_auto_switch").prop('checked');
+        refresh_local();
+    }
+
+    function detect_url_change() {
+        var input = $("#detect_url");
+        var url = input.val().trim();
+        if (!url.startsWith('https://'))
+            url = 'https://github.com/';
+        input.val(url);
+
+        g_config_local['auto_detect']['detect_url'] = url;
+        refresh_local();
+    }
+
+    function detect_time_span_change() {
+        var input = $("#detect_time_span");
+        var time_span = parseInt(input.val());
+        if (time_span > 3600) {
+            time_span = 3600;
+        } else if (time_span < 10) {
+            time_span = 10;
+        }
+        input.val(time_span);
+
+        g_config_local['auto_detect']['detect_span'] = time_span;
+        refresh_local();
+    }
+
+    function detect_timeout_change() {
+        var input = $("#detect_timeout");
+        var timeout = parseFloat(input.val());
+        if (timeout > 10) {
+            timeout = 10;
+        } else if (timeout < 0.5) {
+            timeout = 0.5;
+        }
+        input.val(timeout);
+
+        g_config_local['auto_detect']['timeout'] = timeout;
+        refresh_local();
+    }
+
+    function detect_max_retry_change() {
+        var input = $("#detect_max_retry");
+        var max_retry = parseInt(input.val());
+        if (max_retry > 10) {
+            max_retry = 10;
+        } else if (max_retry < 1) {
+            max_retry = 1;
+        }
+        input.val(max_retry);
+
+        g_config_local['auto_detect']['failed_count'] = max_retry;
+        refresh_local();
     }
 
     function enable_socks_proxy_change() {

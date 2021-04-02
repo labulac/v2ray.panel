@@ -29,7 +29,13 @@ class CoreService:
     user_config: V2RayUserConfig = V2RayUserConfig()
     v2ray:V2rayController = make_controller()
     node_manager:NodeManager = NodeManager()
-    scheduler:BackgroundScheduler = BackgroundScheduler()
+    scheduler:BackgroundScheduler = BackgroundScheduler(
+        {
+            'apscheduler.executors.default': {
+                'class': 'apscheduler.executors.pool:ThreadPoolExecutor',
+                'max_workers': '1'
+            }
+        })
 
     @classmethod
     def load(cls):

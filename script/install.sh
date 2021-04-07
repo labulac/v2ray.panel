@@ -24,8 +24,9 @@ cat>/etc/rc.local<<-EOF
 # bits.
 #
 # By default this script does nothing.
-
-mkdir /var/log/v2ray
+if [ ! -d "/var/log/v2ray" ]; then
+    mkdir /var/log/v2ray
+fi
 exit 0
 EOF
 

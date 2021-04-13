@@ -1,5 +1,7 @@
 FROM v2fly/v2fly-core
 
+MAINTAINER labulac
+
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
 
 RUN mkdir -p /usr/local/V2ray.Fun
